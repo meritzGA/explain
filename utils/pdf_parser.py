@@ -1,17 +1,17 @@
 """PDF 텍스트 추출 및 담보 은행 매칭"""
 import re
-import pdfplumber
+from pypdf import PdfReader
 from utils.db import get_all
 
 
 def extract_text(file) -> str:
-    """pdfplumber로 PDF 전 페이지 텍스트 추출"""
+    """pypdf로 PDF 전 페이지 텍스트 추출"""
+    reader = PdfReader(file)
     pages = []
-    with pdfplumber.open(file) as pdf:
-        for page in pdf.pages:
-            text = page.extract_text()
-            if text:
-                pages.append(text)
+    for page in reader.pages:
+        text = page.extract_text()
+        if text:
+            pages.append(text)
     if not pages:
         raise ValueError("텍스트를 추출할 수 없습니다. DRM이 걸린 파일일 수 있습니다.")
     return "\n".join(pages)
@@ -89,7 +89,6 @@ def match_coverages(text: str) -> list[dict]:
         for kw in entry.get("kw", []):
             if _norm(kw) not in norm_text:
                 continue
-            # 원문에서 금액 검색
             amount = None
             raw_pos = text.find(kw)
             if raw_pos != -1:
