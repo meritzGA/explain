@@ -216,9 +216,9 @@ button, input, select, textarea { font-family: var(--font-sans); }
   min-width: 0;
 }
 .tx-total-label {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: -0.01em;
   color: #9A9A9A;
   margin-bottom: 4px;
 }
@@ -370,7 +370,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
         <!-- 하단 라인 악센트 -->
         <path d="M28 72 L62 72" stroke="#D32F2F" stroke-width="2.5" stroke-linecap="round"/>
       </svg>
-      <div class="mery-badge">EXPERT</div>
+      <div class="mery-badge">ANALYZER</div>
     </div>
     <div class="mery-body">
       <div class="mery-tagline">
@@ -381,7 +381,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
         <span class="name">{{ customer.name }}</span>님의 <span class="red">암 치료비</span> 보장금액은 5년 기준 최대
       </div>
       <div class="mery-amount">
-        {{ headline.five_year_min_display }} ~ {{ headline.five_year_max_display }}<span class="suffix">입니다.</span>
+        {{ headline.five_year_min_display }} ~ {{ headline.five_year_max_display }}<span class="suffix">으로 산출됩니다.</span>
       </div>
       <div class="mery-disclaimer">
         * 아래 담보별 보장금액을 단순 합산하여 5년을 곱한 참고용 수치입니다. 실제 보장금액과 다를 수 있습니다.
@@ -412,7 +412,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
       <div class="tx-head">
         <div class="tx-icon">{{ tx_icon(card.icon) | safe }}</div>
         <div class="tx-total">
-          <div class="tx-total-label">COVERAGE TOTAL</div>
+          <div class="tx-total-label">보장 합산</div>
           <div class="tx-total-amount">{{ card.subtotal_display | replace('\n', '') }}</div>
         </div>
       </div>
@@ -450,7 +450,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
         <polyline points="7 10 12 15 17 10"/>
         <line x1="12" y1="15" x2="12" y2="3"/>
       </svg>
-      이미지 저장
+      이미지로 저장
     </button>
   </div>
 
@@ -535,7 +535,7 @@ async function saveAsImage() {
     var el = document.querySelector('[data-customer-name]');
     var name = el ? el.getAttribute('data-customer-name') : '고객';
     var today = new Date().toISOString().slice(0, 10);
-    var filename = '암치료비_보장분석_' + name + '_' + today + '.png';
+    var filename = '보장분석_' + name + '_' + today + '.png';
 
     var dataUrl = canvas.toDataURL('image/png');
     var a = document.createElement('a');
