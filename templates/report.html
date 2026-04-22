@@ -431,7 +431,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
         <div class="tx-icon">{{ tx_icon(card.icon) | safe }}</div>
         <div class="tx-total">
           <div class="tx-total-label">COVERAGE TOTAL</div>
-          <div class="tx-total-amount">{{ card.subtotal_display }}</div>
+          <div class="tx-total-amount">{{ card.subtotal_display | replace('\n', '') }}</div>
         </div>
       </div>
       <div class="tx-divider"></div>
