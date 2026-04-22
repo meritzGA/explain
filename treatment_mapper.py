@@ -93,6 +93,10 @@ def build_treatment_cards(
             color_text=card_def.get("color_text", "#993C1D"),
         )
 
+        # exclusive_group 단위로 "가장 큰 금액만" 선택하기 위한 버킷
+        # { group_name: [ (TreatmentItem, matching_cov), ... ] }
+        exclusive_buckets: dict[str, list[tuple[TreatmentItem, Coverage]]] = {}
+
         for contrib in card_def.get("contributions", []):
             match_re = contrib["match_coverage"]
             # 해당 담보를 coverages 리스트에서 찾기
@@ -103,6 +107,8 @@ def build_treatment_cards(
                     break
             if not matching_cov:
                 continue
+
+            exclusive_group = contrib.get("exclusive_group")
 
             for item_def in contrib.get("items", []):
                 # follow_coverage_amount=True면 담보의 실제 가입금액을 사용
@@ -132,7 +138,16 @@ def build_treatment_cards(
                         max_amount=amt,
                         display=f"{amt:,}만",
                     )
-                card.items.append(item)
+
+                if exclusive_group:
+                    exclusive_buckets.setdefault(exclusive_group, []).append((item, matching_cov))
+                else:
+                    card.items.append(item)
+
+        # 각 exclusive_group에서 max_amount가 가장 큰 항목 하나만 선택
+        for group_name, candidates in exclusive_buckets.items():
+            best = max(candidates, key=lambda pair: pair[0].max_amount)
+            card.items.append(best[0])
 
         card.subtotal_min = sum(i.min_amount for i in card.items)
         card.subtotal_max = sum(i.max_amount for i in card.items)
@@ -211,14 +226,17 @@ def group_items_by_coverage(card: TreatmentCard) -> list[dict]:
 
 
 def _shorten_coverage_name(name: str) -> str:
-    """긴 담보명을 카드에 맞게 잘라냄."""
-    # 괄호 안 부가정보 일부 제거
+    """긴 담보명을 카드에 맞게 잘라냄. 원본 사이트는 상세 정보를 ... 으로 축약."""
+    # 괄호 안 부가정보 제거
     name = re.sub(r'\(맞춤간편가입\)', '', name)
     name = re.sub(r'\(건강가입\)', '', name)
     name = re.sub(r'\(31간편가입\)', '', name)
     name = re.sub(r'\(통합간편가입\)', '', name)
+    name = re.sub(r'\(암중점치료기관\(상급종합병원\s*포함\)\)', '(암중점치료기관(상급종합병원 ...', name)
+    name = re.sub(r'\(비급여\(전액본인부담\s*포함\),\s*암중점치료기관\(상급종합병원\s*포함\)\)', '(비급여(전액본인부담 포함), 암중점...', name)
     name = re.sub(r'\s+', ' ', name).strip()
-    # 50자 초과면 ...으로 자르기
-    if len(name) > 48:
-        name = name[:45] + '...'
+    # 담보 선두의 ┗ 제거
+    name = name.lstrip('┗').strip()
+    if len(name) > 52:
+        name = name[:48] + '...'
     return name

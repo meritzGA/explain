@@ -34,19 +34,42 @@ from treatment_mapper import (
 
 BASE_DIR = Path(__file__).parent
 
+
+def _find_asset_dir(name: str) -> Path:
+    """templates/ 또는 config/ 폴더를 현재 위치부터 상위로 순차 탐색.
+
+    Streamlit Cloud의 작업 디렉터리 차이로 인해 BASE_DIR 상대 경로가 맞지 않을 수
+    있어, 여러 후보를 시도하고 실패 시 명확한 에러를 던진다.
+    """
+    candidates = [
+        BASE_DIR / name,                        # 기본 (app.py와 같은 위치)
+        BASE_DIR.parent / name,                 # 한 단계 위
+        Path.cwd() / name,                      # 현재 작업 디렉터리
+        Path.cwd() / "meritz_event_converter" / name,  # 서브폴더 명시적
+    ]
+    for p in candidates:
+        if p.exists() and p.is_dir():
+            return p
+    # 실패: 디버깅 정보를 포함한 에러
+    tried = "\n".join(f"  - {p}" for p in candidates)
+    raise FileNotFoundError(
+        f"'{name}' 폴더를 찾을 수 없습니다. 다음 경로를 시도했습니다:\n{tried}\n"
+        f"GitHub 레포에 '{name}/' 폴더가 올바르게 업로드되었는지 확인하세요."
+    )
+
 @st.cache_resource
 def load_events_config() -> dict:
-    with open(BASE_DIR / "config" / "events.json", encoding="utf-8") as f:
+    with open(_find_asset_dir("config") / "events.json", encoding="utf-8") as f:
         return json.load(f)
 
 @st.cache_resource
 def load_treatments_config() -> dict:
-    with open(BASE_DIR / "config" / "treatments.json", encoding="utf-8") as f:
+    with open(_find_asset_dir("config") / "treatments.json", encoding="utf-8") as f:
         return json.load(f)
 
 @st.cache_resource
 def load_jinja_env() -> Environment:
-    env = Environment(loader=FileSystemLoader(BASE_DIR / "templates"))
+    env = Environment(loader=FileSystemLoader(_find_asset_dir("templates")))
     env.globals["icon_svg"] = icon_svg
     env.globals["tx_icon"] = tx_icon_svg
     return env
@@ -75,18 +98,115 @@ def icon_svg(icon_name: str) -> str:
     return ICONS.get(icon_name, ICONS["ribbon"])
 
 
-# 치료 카드용 아이콘 (검은 테두리 원 안에 들어가는 작은 아이콘)
+# 치료 카드용 큰 아이콘 — 스크린샷의 검은 선 일러스트 스타일
 TX_ICONS = {
-    "target_pill": '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1D2B" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1.5" fill="#1F1D2B"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke-linecap="round"/></svg>',
-    "shield_pill": '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1D2B" stroke-width="1.5"><path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7z"/><path d="M8 11h8M10 8l4 6M14 8l-4 6" stroke-linecap="round"/></svg>',
-    "beam": '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1D2B" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 2"/><path d="M12 5v-2M12 21v-2M5 12h-2M21 12h-2M7 7l-1.5-1.5M17 17l1.5 1.5M7 17l-1.5 1.5M17 7l1.5-1.5" stroke-linecap="round"/></svg>',
-    "scalpel": '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1D2B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5 20 9l-10 10H4v-6z"/><path d="M6 13h4M8 11v4"/></svg>',
-    "robot": '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1D2B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="8" width="14" height="10" rx="2"/><circle cx="9" cy="13" r="1" fill="#1F1D2B"/><circle cx="15" cy="13" r="1" fill="#1F1D2B"/><path d="M12 8V5M10 5h4M7 18v3M17 18v3"/></svg>',
-    "pill": '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1D2B" stroke-width="1.5"><rect x="3" y="8" width="18" height="8" rx="4"/><path d="M12 8v8" stroke-linecap="round"/></svg>',
-    "radiation": '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1D2B" stroke-width="1.5"><circle cx="12" cy="12" r="2.5" fill="#1F1D2B"/><path d="M12 3a9 9 0 0 0-7.8 4.5L12 12zM20.8 7.5A9 9 0 0 0 12 3v9zM12 21a9 9 0 0 0 7.8-4.5L12 12zM4.2 16.5A9 9 0 0 0 12 21v-9z" stroke-linejoin="round"/></svg>',
-    "atom": '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1D2B" stroke-width="1.5"><circle cx="12" cy="12" r="1.5" fill="#1F1D2B"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)"/></svg>',
-    "focus": '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1D2B" stroke-width="1.5"><circle cx="12" cy="12" r="2" fill="#1F1D2B"/><circle cx="12" cy="12" r="6"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke-linecap="round"/></svg>',
-    "ribbon": '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1D2B" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke-linejoin="round"/></svg>',
+    # 표적항암: 과녁 + 조준선
+    "target_pill": '''<svg viewBox="0 0 56 56" width="56" height="56" fill="none" stroke="#1F1F1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="28" cy="28" r="22"/>
+      <circle cx="28" cy="28" r="14"/>
+      <circle cx="28" cy="28" r="6"/>
+      <circle cx="28" cy="28" r="1.5" fill="#1F1F1F"/>
+      <path d="M28 2v6M28 48v6M2 28h6M48 28h6"/>
+      <path d="M44 12l6-6M12 44l-6 6" stroke-width="2.2"/>
+    </svg>''',
+
+    # 면역항암: 꽃잎 패턴 (원본 스크린샷은 프로펠러/선풍기 같은 4-way pattern)
+    "shield_pill": '''<svg viewBox="0 0 56 56" width="56" height="56" fill="none" stroke="#1F1F1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="28" cy="28" r="22"/>
+      <circle cx="28" cy="28" r="3" fill="#1F1F1F"/>
+      <path d="M28 12 Q22 18 28 28 Q34 18 28 12" fill="#1F1F1F" stroke="none"/>
+      <path d="M28 44 Q22 38 28 28 Q34 38 28 44" fill="#1F1F1F" stroke="none"/>
+      <path d="M12 28 Q18 22 28 28 Q18 34 12 28" fill="#1F1F1F" stroke="none"/>
+      <path d="M44 28 Q38 22 28 28 Q38 34 44 28" fill="#1F1F1F" stroke="none"/>
+    </svg>''',
+
+    # 양성자방사선: 원자 궤도
+    "beam": '''<svg viewBox="0 0 56 56" width="56" height="56" fill="none" stroke="#1F1F1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="28" cy="28" r="22"/>
+      <ellipse cx="28" cy="28" rx="18" ry="8"/>
+      <ellipse cx="28" cy="28" rx="18" ry="8" transform="rotate(60 28 28)"/>
+      <ellipse cx="28" cy="28" rx="18" ry="8" transform="rotate(120 28 28)"/>
+      <circle cx="28" cy="28" r="3" fill="#1F1F1F"/>
+      <circle cx="46" cy="28" r="2" fill="#1F1F1F"/>
+      <circle cx="18" cy="42" r="2" fill="#1F1F1F"/>
+      <circle cx="18" cy="14" r="2" fill="#1F1F1F"/>
+    </svg>''',
+
+    # 암수술비: 가위 + 메스 교차
+    "scalpel": '''<svg viewBox="0 0 56 56" width="56" height="56" fill="none" stroke="#1F1F1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="28" cy="28" r="22"/>
+      <circle cx="19" cy="20" r="3"/>
+      <circle cx="19" cy="36" r="3"/>
+      <path d="M21.5 21.5 L38 34M21.5 34.5 L38 22"/>
+      <path d="M33 28 L42 32 L44 38 L38 36 L36 30 Z" fill="#1F1F1F" stroke="none"/>
+    </svg>''',
+
+    # 다빈치 로봇수술: 다관절 로봇 팔
+    "robot": '''<svg viewBox="0 0 56 56" width="56" height="56" fill="none" stroke="#1F1F1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <!-- 베이스 -->
+      <rect x="10" y="42" width="16" height="6" rx="1"/>
+      <!-- 1관절 -->
+      <path d="M18 42 L18 34"/>
+      <circle cx="18" cy="32" r="2.5" fill="#FFFFFF"/>
+      <!-- 2관절 팔 -->
+      <path d="M18 32 L32 20"/>
+      <circle cx="32" cy="20" r="2.5" fill="#FFFFFF"/>
+      <!-- 3관절 손 -->
+      <path d="M32 20 L44 26"/>
+      <!-- 집게 그리퍼 -->
+      <path d="M44 26 L48 22 M44 26 L48 30"/>
+      <!-- 환자대 하단 암시 -->
+      <path d="M8 48 L48 48" stroke-width="1.5"/>
+    </svg>''',
+
+    # 항암약물: IV 링거팩 + 방울
+    "pill": '''<svg viewBox="0 0 56 56" width="56" height="56" fill="none" stroke="#1F1F1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <!-- 링거 팩 (상단) -->
+      <path d="M20 8 L36 8 L34 24 Q28 30 22 24 Z"/>
+      <!-- 팩 걸이 고리 -->
+      <path d="M26 4 L26 8 M30 4 L30 8"/>
+      <!-- 점액 -->
+      <path d="M28 24 L28 34"/>
+      <!-- 방울 -->
+      <path d="M28 34 Q25 38 28 42 Q31 38 28 34 Z" fill="#1F1F1F"/>
+      <!-- 받침 -->
+      <path d="M24 48 L32 48"/>
+      <!-- 두 번째 방울 (떨어지는) -->
+      <circle cx="28" cy="46" r="1" fill="#1F1F1F"/>
+    </svg>''',
+
+    # 항암방사선: 방사 삼각 패턴
+    "radiation": '''<svg viewBox="0 0 56 56" width="56" height="56" fill="none" stroke="#1F1F1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="28" cy="28" r="2.5" fill="#1F1F1F"/>
+      <path d="M28 8 L20 20 L36 20 Z"/>
+      <path d="M48 28 L36 20 L36 36 Z"/>
+      <path d="M28 48 L20 36 L36 36 Z"/>
+      <path d="M8 28 L20 20 L20 36 Z"/>
+      <circle cx="28" cy="28" r="22"/>
+    </svg>''',
+
+    # 중입자방사선: 화살 과녁 / 원자 펜던트
+    "atom": '''<svg viewBox="0 0 56 56" width="56" height="56" fill="none" stroke="#1F1F1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 24 Q10 12 22 12 Q34 12 34 22" stroke-width="2.5"/>
+      <circle cx="34" cy="28" r="10"/>
+      <circle cx="34" cy="28" r="2" fill="#1F1F1F"/>
+      <circle cx="22" cy="12" r="2" fill="#1F1F1F"/>
+      <path d="M10 24 L4 24M10 24 L10 30"/>
+      <path d="M44 28 L52 28"/>
+    </svg>''',
+
+    # 세기조절방사선: 사각 안 과녁
+    "focus": '''<svg viewBox="0 0 56 56" width="56" height="56" fill="none" stroke="#1F1F1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="6" y="6" width="44" height="44" rx="2"/>
+      <circle cx="28" cy="28" r="6"/>
+      <circle cx="28" cy="28" r="1.5" fill="#1F1F1F"/>
+      <path d="M34 22 L44 12"/>
+      <path d="M44 12 L44 18 M44 12 L38 12"/>
+    </svg>''',
+
+    "ribbon": '''<svg viewBox="0 0 56 56" width="56" height="56" fill="none" stroke="#1F1F1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="28" cy="28" r="22"/>
+    </svg>''',
 }
 
 def tx_icon_svg(icon_name: str) -> str:
@@ -230,87 +350,77 @@ def render_html(processed: dict) -> str:
 
 def main():
     st.set_page_config(
-        page_title="메리츠 제안서 → 고객용 요약",
+        page_title="메리츠 암 보장 분석기",
         layout="wide",
         initial_sidebar_state="collapsed",
     )
 
+    # Streamlit 기본 여백 최소화 + 깔끔한 배경
     st.markdown("""
     <style>
-      .block-container { padding-top: 2rem; padding-bottom: 2rem; max-width: 1100px; }
-      h1 { font-size: 26px !important; font-weight: 500 !important; }
+      .block-container { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 1240px; }
+      [data-testid="stHeader"] { background: transparent; }
+      .stApp { background: #EEEEEE; }
+      h1, h2 { font-weight: 700 !important; }
     </style>
     """, unsafe_allow_html=True)
 
-    st.title("메리츠 가입제안서 → 고객용 보장 요약")
-    st.caption("PDF 제안서를 올리면 이벤트 기반 보장 요약을 자동으로 만들어 드립니다.")
+    st.markdown(
+        "<h1 style='font-size: 26px; margin-bottom: 4px;'>"
+        "<span style='color: #E53935;'>메리츠</span> 암 보장 분석기</h1>"
+        "<p style='color: #6A6A6A; font-size: 14px; margin-bottom: 24px;'>"
+        "가입제안서 PDF를 올리시면 고객이 받을 수 있는 암 치료비를 자동으로 분석해 드립니다.</p>",
+        unsafe_allow_html=True
+    )
 
     uploaded = st.file_uploader(
-        "제안서 PDF를 올려주세요",
+        "가입제안서 PDF를 업로드하세요",
         type="pdf",
-        help="메리츠 가입제안서 PDF를 업로드하면 자동으로 변환됩니다.",
+        label_visibility="collapsed",
     )
 
     if not uploaded:
-        st.info("왼쪽 상단에 PDF를 업로드하시면 자동으로 요약이 생성됩니다.")
+        st.info("PDF를 업로드하시면 자동으로 분석 결과가 생성됩니다.")
         return
 
     pdf_bytes = uploaded.read()
-    file_hash = hashlib.md5(pdf_bytes).hexdigest()[:8]
 
-    with st.spinner("변환 중..."):
+    with st.spinner("분석 중..."):
         processed = process_pdf(pdf_bytes)
+        # 파일 정보 주입 (템플릿 상단 chip 표시용)
+        processed["source_filename"] = uploaded.name
+        kb = len(pdf_bytes) / 1024
+        processed["source_filesize"] = f"{kb:,.1f} KB"
         html = render_html(processed)
 
-    col_left, col_right = st.columns([3, 1])
-    with col_left:
-        st.subheader(f"{processed['customer']['name']} 고객 보장 요약")
-    with col_right:
-        st.download_button(
-            "HTML 다운로드",
-            data=html.encode("utf-8"),
-            file_name=f"{processed['customer']['name']}_보장요약.html",
-            mime="text/html",
-            use_container_width=True,
-        )
+    # 다운로드 버튼
+    st.download_button(
+        "분석 결과 HTML 다운로드",
+        data=html.encode("utf-8"),
+        file_name=f"{processed['customer']['name']}_암보장분석.html",
+        mime="text/html",
+    )
 
-    # 렌더된 HTML 표시
-    st.components.v1.html(html, height=2400, scrolling=True)
+    # 인라인 렌더
+    st.components.v1.html(html, height=2200, scrolling=True)
 
-    # 디버그/검수용 원본 데이터
+    # 파싱 검수 영역 (접혀있음)
     with st.expander("파싱 결과 원본 보기 (검수용)"):
-        tab1, tab2, tab3 = st.tabs(["요약", "담보 전체", "이벤트 매핑"])
-
+        tab1, tab2 = st.tabs(["담보 전체", "치료 카드 매핑"])
         with tab1:
-            c1, c2, c3 = st.columns(3)
-            c1.metric("담보 개수", len(processed["coverages_all"]))
-            c2.metric("매핑된 이벤트", len(processed["events"]))
-            c3.metric("그 밖에 보장", len(processed["extras"]))
-
-            st.write("**고객 정보**")
-            st.json(processed["customer"])
-            st.write("**계약 정보**")
-            st.json(processed["policy"])
-
+            st.dataframe(processed["coverages_all"], use_container_width=True, hide_index=True)
         with tab2:
-            st.dataframe(
-                processed["coverages_all"],
-                use_container_width=True,
-                hide_index=True,
-            )
-
-        with tab3:
-            for ev in processed["events"]:
+            pt = processed.get("product_type") or "매칭된 상품 타입 없음"
+            st.caption(f"상품 타입: {pt}")
+            if not processed.get("treatment_cards"):
+                st.warning("치료 카드가 생성되지 않았습니다. config/treatments.json에 해당 상품 프리셋이 없는 상태입니다.")
+            for card in processed.get("treatment_cards", []):
                 with st.container(border=True):
-                    st.markdown(f"**{ev['label']}** — {ev['amount_display']}")
-                    st.caption(f"매칭된 담보 {len(ev['coverages'])}개 · 합계 {ev['total']:,}원")
-                    for c in ev["coverages"]:
-                        st.caption(f"• [{c['code']}] {c['name']} ({c['amount_display']})")
-            if processed["extras"]:
-                with st.container(border=True):
-                    st.markdown(f"**그 밖에 보장** — {len(processed['extras'])}개")
-                    for c in processed["extras"]:
-                        st.caption(f"• [{c['code']}] {c['name']} ({c['amount_display']})")
+                    st.markdown(f"**{card['label']}** — {card['subtotal_display'].replace(chr(10), ' ')}")
+                    for g in card["groups"]:
+                        st.caption(f"• {g['coverage_name_short']}")
+                        for it in g["item_list"]:
+                            st.caption(f"    ┗ {it['label']}: {it['display']}")
 
 
 if __name__ == "__main__":
