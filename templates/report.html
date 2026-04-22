@@ -115,6 +115,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
   line-height: 1.1;
   margin: 8px 0 2px;
   font-feature-settings: 'tnum' on, 'lnum' on;
+  white-space: nowrap;
 }
 .mery-amount .suffix {
   font-size: 20px;
@@ -478,8 +479,8 @@ button, input, select, textarea { font-family: var(--font-sans); }
 <script>
 /* ── 보장금액 한 줄 자동 맞춤 (전역 — 캡처 전에도 호출) ── */
 function fitAmounts() {
+  /* 카드 금액 */
   document.querySelectorAll('.tx-total-amount').forEach(function(el) {
-    /* 줄바꿈·공백 제거: "1,500만원~\n3,000만원" → "1,500만원~3,000만원" */
     var cleaned = el.textContent.replace(/\s+/g, '');
     if (cleaned !== el.textContent) el.textContent = cleaned;
 
@@ -487,11 +488,24 @@ function fitAmounts() {
     if (!parent) return;
     var maxW = parent.offsetWidth;
 
-    /* 24px에서 시작, 넘치면 0.5px씩 줄여 14px까지 */
     var fs = 24;
     el.style.fontSize = fs + 'px';
     while (el.scrollWidth > maxW && fs > 14) {
       fs -= 0.5;
+      el.style.fontSize = fs + 'px';
+    }
+  });
+
+  /* 히어로 금액 (mery-amount) */
+  document.querySelectorAll('.mery-amount').forEach(function(el) {
+    var parent = el.closest('.mery-body') || el.parentElement;
+    if (!parent) return;
+    var maxW = parent.offsetWidth;
+
+    var fs = 44;
+    el.style.fontSize = fs + 'px';
+    while (el.scrollWidth > maxW && fs > 24) {
+      fs -= 1;
       el.style.fontSize = fs + 'px';
     }
   });
