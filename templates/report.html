@@ -281,7 +281,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
 }
 
 /* ── 하단 영역 ── */
-.foot {
+.action-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -289,6 +289,25 @@ button, input, select, textarea { font-family: var(--font-sans); }
   gap: 20px;
   flex-wrap: wrap;
 }
+.save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #111827;
+  color: #FFFFFF;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: -0.015em;
+  transition: background 0.15s ease;
+}
+.save-btn:hover { background: #000000; }
+.save-btn:disabled { background: #9CA3AF; cursor: not-allowed; }
+.save-btn svg { flex-shrink: 0; }
 .feedback {
   background: #FFF5F5;
   color: #E53935;
@@ -320,10 +339,9 @@ button, input, select, textarea { font-family: var(--font-sans); }
   font-size: 11px;
   color: #9A9A9A;
   text-align: right;
-  flex: 1;
-  min-width: 0;
   line-height: 1.5;
   letter-spacing: -0.01em;
+  margin-top: 32px;
 }
 
 /* ── 인쇄 최적화 ── */
@@ -335,12 +353,15 @@ button, input, select, textarea { font-family: var(--font-sans); }
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   .feedback { display: none; }
+  .action-bar { display: none; }
 }
 </style>
 </head>
 <body>
 
 <div class="page-shell">
+
+  <div id="report-capture" data-customer-name="{{ customer.name }}">
 
   {% if headline %}
   <!-- ── 메리 인사이트 박스 ── -->
@@ -458,14 +479,71 @@ button, input, select, textarea { font-family: var(--font-sans); }
   </div>
   {% endif %}
 
-  <!-- ── 하단 ── -->
-  <div class="foot">
+  <!-- ── 하단 disclaimer (캡처에 포함) ── -->
+  <div class="disclaimer">
+    * 가입제안서를 기반으로 작성한 내용이며, 실제 값과 상이할 수 있습니다. 가입제안서를 확인해주세요
+  </div>
+
+  </div><!-- /report-capture -->
+
+  <!-- ── 액션 바 (캡처 대상 밖) ── -->
+  <div class="action-bar">
+    <button id="save-img-btn" class="save-btn" onclick="saveAsImage()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      이미지 저장
+    </button>
     <button class="feedback" onclick="alert('피드백 감사합니다.');">오류가 생겼나요?</button>
-    <div class="disclaimer">
-      * 가입제안서를 기반으로 작성한 내용이며, 실제 값과 상이할 수 있습니다. 가입제안서를 확인해주세요
-    </div>
   </div>
 
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+async function saveAsImage() {
+  var btn = document.getElementById('save-img-btn');
+  var target = document.getElementById('report-capture');
+  if (!target) return;
+
+  var origText = btn.innerHTML;
+  btn.textContent = '이미지 생성 중...';
+  btn.disabled = true;
+
+  try {
+    var canvas = await html2canvas(target, {
+      scale: 2,
+      backgroundColor: '#FFFFFF',
+      useCORS: true,
+      logging: false,
+      windowWidth: target.scrollWidth,
+      windowHeight: target.scrollHeight
+    });
+
+    var el = document.querySelector('[data-customer-name]');
+    var name = el ? el.getAttribute('data-customer-name') : '고객';
+    var today = new Date().toISOString().slice(0, 10);
+    var filename = '암치료비_보장분석_' + name + '_' + today + '.png';
+
+    canvas.toBlob(function(blob) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function() { URL.revokeObjectURL(url); }, 100);
+    }, 'image/png');
+  } catch (err) {
+    alert('이미지 저장 중 오류가 발생했습니다: ' + err.message);
+  } finally {
+    btn.innerHTML = origText;
+    btn.disabled = false;
+  }
+}
+</script>
 </body>
 </html>
