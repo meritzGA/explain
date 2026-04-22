@@ -47,35 +47,6 @@ button, input, select, textarea { font-family: var(--font-sans); }
   padding: 36px 48px 48px;
 }
 
-/* ── 파일 표시 영역 ── */
-.file-chip {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: #FFFFFF;
-  border: 1px solid #E8E8E8;
-  border-radius: 14px;
-  padding: 16px 22px;
-  margin-bottom: 20px;
-}
-.file-chip-icon {
-  width: 32px; height: 36px; flex-shrink: 0;
-  background: #FEE4E4;
-  border-radius: 4px;
-  position: relative;
-  display: flex; align-items: center; justify-content: center;
-}
-.file-chip-icon::before {
-  content: ''; position: absolute;
-  top: -1px; right: -1px;
-  width: 10px; height: 10px;
-  background: #FFFFFF;
-  border-left: 1px solid #FEE4E4;
-  border-bottom: 1px solid #FEE4E4;
-}
-.file-chip-name { font-size: 15px; font-weight: 500; color: #1F1F1F; letter-spacing: -0.01em; }
-.file-chip-size { font-size: 13px; color: #A0A0A0; margin-top: 2px; letter-spacing: -0.01em; }
-
 /* ── 메리 인사이트 박스 ── */
 .mery-box {
   background: #FAFAFA;
@@ -370,15 +341,6 @@ button, input, select, textarea { font-family: var(--font-sans); }
 <body>
 
 <div class="page-shell">
-
-  <!-- ── 파일 표시 영역 ── -->
-  <div class="file-chip">
-    <div class="file-chip-icon"></div>
-    <div>
-      <div class="file-chip-name">{{ source_filename or customer.name + '.pdf' }}</div>
-      <div class="file-chip-size">{{ source_filesize or '' }}</div>
-    </div>
-  </div>
 
   {% if headline %}
   <!-- ── 메리 인사이트 박스 ── -->
