@@ -491,12 +491,6 @@ def main():
       }
 
       /* ── 업로드 후 파일 칩 ── */
-      /* 파일이 붙으면 드롭존은 숨기고 파일 칩만 표시 */
-      [data-testid="stFileUploader"]:has([data-testid="stFileUploaderFile"])
-        [data-testid="stFileUploaderDropzone"] {
-        display: none !important;
-      }
-
       [data-testid="stFileUploaderFile"] {
         background: #FFFFFF !important;
         border: 1px solid #E8E8E8 !important;
@@ -586,42 +580,24 @@ def main():
 
     pdf_bytes = uploaded.read()
 
+    # ── 업로드 후: 드롭존 강제 숨김 (CSS :has()가 안 먹는 환경 대응) ──
+    st.markdown("""
+    <style>
+      [data-testid="stFileUploaderDropzone"] {
+        display: none !important;
+      }
+    </style>
+    """, unsafe_allow_html=True)
+
     with st.spinner("분석 중..."):
         processed = process_pdf(pdf_bytes)
-        # 파일 정보 주입 (템플릿 상단 chip 표시용)
         processed["source_filename"] = uploaded.name
         kb = len(pdf_bytes) / 1024
         processed["source_filesize"] = f"{kb:,.1f} KB"
         html = render_html(processed)
 
-    # 다운로드 버튼
-    st.download_button(
-        "분석 결과 HTML 다운로드",
-        data=html.encode("utf-8"),
-        file_name=f"{processed['customer']['name']}_암보장분석.html",
-        mime="text/html",
-    )
-
     # 인라인 렌더
-    st.components.v1.html(html, height=2200, scrolling=True)
-
-    # 파싱 검수 영역 (접혀있음)
-    with st.expander("파싱 결과 원본 보기 (검수용)"):
-        tab1, tab2 = st.tabs(["담보 전체", "치료 카드 매핑"])
-        with tab1:
-            st.dataframe(processed["coverages_all"], use_container_width=True, hide_index=True)
-        with tab2:
-            pt = processed.get("product_type") or "매칭된 상품 타입 없음"
-            st.caption(f"상품 타입: {pt}")
-            if not processed.get("treatment_cards"):
-                st.warning("치료 카드가 생성되지 않았습니다. config/treatments.json에 해당 상품 프리셋이 없는 상태입니다.")
-            for card in processed.get("treatment_cards", []):
-                with st.container(border=True):
-                    st.markdown(f"**{card['label']}** — {card['subtotal_display'].replace(chr(10), ' ')}")
-                    for g in card["groups"]:
-                        st.caption(f"• {g['coverage_name_short']}")
-                        for it in g["item_list"]:
-                            st.caption(f"    ┗ {it['label']}: {it['display']}")
+    st.components.v1.html(html, height=2400, scrolling=True)
 
 
 if __name__ == "__main__":
