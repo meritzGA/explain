@@ -127,7 +127,7 @@ def build_treatment_cards(
                         label=item_def["label"],
                         min_amount=item_def["min"],
                         max_amount=item_def["max"],
-                        display=item_def.get("display", f"{item_def['min']:,}만({item_def['max']:,}만)"),
+                        display=f"{item_def['max']:,}만({item_def['min']:,}만)",
                     )
                 else:
                     amt = item_def.get("amount", 0)
