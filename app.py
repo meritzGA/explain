@@ -439,20 +439,16 @@ def main():
       [data-testid="stFileUploader"] label { display: none !important; }
       [data-testid="stFileUploader"] section { padding: 0 !important; }
 
-      /* 드롭존 본체 — 큰 점선 카드 + 중앙 아이콘 */
+      /* 드롭존 본체 — 큰 점선 카드. 내부는 건드리지 않고 배경+오버레이로만 표현 */
       [data-testid="stFileUploaderDropzone"] {
+        position: relative !important;
         background-color: #FFFFFF !important;
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76' fill='none'><rect width='76' height='76' rx='18' fill='%23FEE8EC'/><path d='M28 28h12a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2V30a2 2 0 0 1 2-2z' stroke='%23E53935' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M42 28v6h6' stroke='%23E53935' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M34 44l-4-4 4-4M30 40h10' stroke='%23E53935' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round' transform='rotate(90 34 40)'/></svg>") !important;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76' fill='none'><rect width='76' height='76' rx='18' fill='%23FEE8EC'/><path d='M25 48v4a2 2 0 0 0 2 2h22a2 2 0 0 0 2-2v-4' stroke='%23E53935' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M38 44V26M31 33l7-7 7 7' stroke='%23E53935' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg>") !important;
         background-repeat: no-repeat !important;
         background-position: center 60px !important;
         border: 2px dashed var(--red-border) !important;
         border-radius: 24px !important;
-        padding: 180px 40px 56px !important;
         min-height: 340px !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
         cursor: pointer !important;
         transition: all 0.2s ease !important;
       }
@@ -461,25 +457,37 @@ def main():
         background-color: #FFFAFA !important;
       }
 
-      /* 기본 영어 지시문·버튼 모두 숨김 */
-      [data-testid="stFileUploaderDropzoneInstructions"],
-      [data-testid="stFileUploaderDropzone"] > button {
-        display: none !important;
+      /* 드롭존 내부 기본 UI(아이콘/문구/Browse 버튼)를 모조리 투명화.
+         opacity: 0은 클릭·드래그 이벤트는 정상 수신되므로 기능은 유지됨. */
+      [data-testid="stFileUploaderDropzone"] > *,
+      [data-testid="stFileUploaderDropzone"] > * * {
+        opacity: 0 !important;
       }
 
-      /* 커스텀 2줄 안내 */
+      /* 커스텀 2줄 안내 — absolute 포지셔닝으로 오버레이 */
       [data-testid="stFileUploaderDropzone"]::before {
         content: '제안서 파일을 이곳에 놓아주세요';
+        position: absolute;
+        top: 160px; left: 0; right: 0;
+        text-align: center;
         font-size: 19px; font-weight: 700;
         color: var(--ink);
         letter-spacing: -0.025em;
-        margin-bottom: 10px;
+        pointer-events: none;
+        opacity: 1 !important;
+        z-index: 1;
       }
       [data-testid="stFileUploaderDropzone"]::after {
         content: 'PDF 파일을 드래그하거나 클릭하여 시작하세요';
+        position: absolute;
+        top: 196px; left: 0; right: 0;
+        text-align: center;
         font-size: 14px; font-weight: 500;
         color: #8A8A8A;
         letter-spacing: -0.01em;
+        pointer-events: none;
+        opacity: 1 !important;
+        z-index: 1;
       }
 
       /* ── 업로드 후 파일 칩 ── */
@@ -532,9 +540,16 @@ def main():
       @media (max-width: 768px) {
         .hero-title { font-size: 40px; }
         [data-testid="stFileUploaderDropzone"] {
-          padding: 150px 24px 40px !important;
           min-height: 280px !important;
           background-position: center 44px !important;
+        }
+        [data-testid="stFileUploaderDropzone"]::before {
+          top: 136px;
+          font-size: 17px;
+        }
+        [data-testid="stFileUploaderDropzone"]::after {
+          top: 168px;
+          font-size: 13px;
         }
       }
     </style>
