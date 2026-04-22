@@ -480,7 +480,6 @@ button, input, select, textarea { font-family: var(--font-sans); }
 (function() {
   function fitAmounts() {
     document.querySelectorAll('.tx-total-amount').forEach(function(el) {
-      /* 줄바꿈 → 물결표 한 줄로 합치기 */
       var raw = el.textContent.replace(/\s+/g, '');
       if (raw !== el.textContent.replace(/\s+/g, '')) el.textContent = raw;
 
@@ -496,24 +495,23 @@ button, input, select, textarea { font-family: var(--font-sans); }
       }
     });
   }
-  /* DOM 로드 후 + 약간의 딜레이(웹폰트 로딩) */
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() { setTimeout(fitAmounts, 100); });
   } else {
     setTimeout(fitAmounts, 100);
   }
-  /* 웹폰트 로드 완료 시 재계산 */
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(function() { setTimeout(fitAmounts, 50); });
   }
 })();
-<script>
+
+/* ── 이미지 저장 (data-URL 방식 — iframe sandbox 호환) ── */
 async function saveAsImage() {
   var btn = document.getElementById('save-img-btn');
   var target = document.getElementById('report-capture');
   if (!target) return;
 
-  var origText = btn.innerHTML;
+  var origHTML = btn.innerHTML;
   btn.textContent = '이미지 생성 중...';
   btn.disabled = true;
 
@@ -532,20 +530,19 @@ async function saveAsImage() {
     var today = new Date().toISOString().slice(0, 10);
     var filename = '암치료비_보장분석_' + name + '_' + today + '.png';
 
-    canvas.toBlob(function(blob) {
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(function() { URL.revokeObjectURL(url); }, 100);
-    }, 'image/png');
+    var dataUrl = canvas.toDataURL('image/png');
+    var a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
   } catch (err) {
     alert('이미지 저장 중 오류가 발생했습니다: ' + err.message);
   } finally {
-    btn.innerHTML = origText;
+    btn.innerHTML = origHTML;
     btn.disabled = false;
   }
 }
