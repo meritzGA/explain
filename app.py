@@ -355,12 +355,14 @@ def main():
         initial_sidebar_state="collapsed",
     )
 
-    # ── Pretendard 폰트 CDN 로드 + Streamlit UI 전역 스타일 ──
+    # ── Pretendard 폰트 로드 + Streamlit UI 전역 스타일 ──
+    # 주의: Streamlit markdown은 <link>와 <style>을 같은 블록에 두면
+    #       파싱이 끊겨 CSS가 본문에 텍스트로 노출될 수 있음.
+    #       반드시 @import 방식으로 <style> 안에서만 로드할 것.
     st.markdown("""
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="stylesheet" as="style" crossorigin
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
     <style>
+      @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+
       /* 폰트 토큰 */
       :root {
         --font-sans: 'Pretendard Variable', Pretendard,
