@@ -350,39 +350,34 @@ def render_html(processed: dict) -> str:
 
 def main():
     st.set_page_config(
-        page_title="메리츠 암 보장 분석기",
+        page_title="암 치료비 보장금액 분석",
         layout="wide",
         initial_sidebar_state="collapsed",
     )
 
-    # ── Pretendard 폰트 로드 + Streamlit UI 전역 스타일 ──
-    # 주의: Streamlit markdown은 <link>와 <style>을 같은 블록에 두면
-    #       파싱이 끊겨 CSS가 본문에 텍스트로 노출될 수 있음.
-    #       반드시 @import 방식으로 <style> 안에서만 로드할 것.
+    # ─────────────────────────────────────────────────────────────
+    # 전역 스타일: Pretendard + Hero 헤더 + 파일 업로더 재디자인
+    # ─────────────────────────────────────────────────────────────
     st.markdown("""
     <style>
       @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
 
-      /* 폰트 토큰 */
       :root {
         --font-sans: 'Pretendard Variable', Pretendard,
-                     -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto,
-                     'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+                     -apple-system, BlinkMacSystemFont, system-ui,
+                     'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+        --red: #E53935;
+        --red-hl: #FECDD3;
+        --red-soft: #FEE8EC;
+        --red-border: #FCD4D4;
+        --ink: #1F1F1F;
+        --muted: #6A6A6A;
+        --bg: #F5F5F5;
       }
 
-      /* Streamlit 전 요소에 폰트 강제 상속
-         - html/body에 지정만으로는 [class*="st-"] 내부에서 깨지는 경우가 있어
-           넓은 선택자로 !important를 걸어둠 */
+      /* ── 폰트 전역 적용 ── */
       html, body, [class*="st-"], [class*="css-"],
-      [data-testid="stAppViewContainer"],
-      [data-testid="stSidebar"],
-      [data-testid="stMarkdownContainer"],
-      [data-testid="stFileUploader"],
-      [data-testid="stFileUploader"] *,
-      [data-testid="stDownloadButton"] *,
-      [data-testid="stExpander"] *,
-      [data-testid="stAlert"] *,
-      [data-testid="stDataFrame"] *,
+      [data-testid="stAppViewContainer"] *,
       button, input, textarea, select {
         font-family: var(--font-sans) !important;
         -webkit-font-smoothing: antialiased;
@@ -391,26 +386,173 @@ def main():
         font-feature-settings: 'tnum' on, 'lnum' on;
       }
 
-      /* 기본 레이아웃 */
-      .block-container { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 1240px; }
+      /* ── 기본 레이아웃 ── */
+      .stApp { background: var(--bg); }
       [data-testid="stHeader"] { background: transparent; }
-      .stApp { background: #EEEEEE; }
+      .block-container {
+        padding-top: 3rem !important;
+        padding-bottom: 3rem !important;
+        max-width: 1160px !important;
+      }
 
-      /* 헤딩 선명도 */
-      h1, h2, h3 {
-        font-weight: 700 !important;
+      /* ── Hero 헤더 ── */
+      .hero-wrap { text-align: center; margin-bottom: 36px; }
+
+      .hero-badge {
+        display: inline-flex; align-items: center; gap: 7px;
+        background: #FFFFFF;
+        border: 1.5px solid var(--red);
+        color: var(--red);
+        font-size: 13px; font-weight: 600;
+        padding: 7px 18px;
+        border-radius: 999px;
+        margin-bottom: 22px;
+        letter-spacing: -0.01em;
+      }
+      .hero-badge::before {
+        content: '';
+        width: 13px; height: 13px;
+        border: 1.5px solid var(--red);
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--red) 0 35%, transparent 36%);
+      }
+
+      .hero-title {
+        font-size: 60px; font-weight: 800;
+        letter-spacing: -0.045em; line-height: 1.15;
+        color: var(--ink); margin: 0 0 18px 0;
+      }
+      .hero-title .hl {
+        color: var(--red);
+        background: linear-gradient(transparent 55%, var(--red-hl) 55%, var(--red-hl) 92%, transparent 92%);
+        padding: 0 6px;
+      }
+
+      .hero-subtitle {
+        font-size: 16px; color: var(--muted);
+        line-height: 1.75; margin: 0; font-weight: 500;
+        letter-spacing: -0.015em;
+      }
+      .hero-subtitle b { color: var(--ink); font-weight: 700; }
+
+      /* ── 파일 업로더: 전면 재디자인 ── */
+      [data-testid="stFileUploader"] label { display: none !important; }
+      [data-testid="stFileUploader"] section { padding: 0 !important; }
+
+      /* 드롭존 본체 — 큰 점선 카드 + 중앙 아이콘 */
+      [data-testid="stFileUploaderDropzone"] {
+        background-color: #FFFFFF !important;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76' fill='none'><rect width='76' height='76' rx='18' fill='%23FEE8EC'/><path d='M28 28h12a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2H28a2 2 0 0 1-2-2V30a2 2 0 0 1 2-2z' stroke='%23E53935' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M42 28v6h6' stroke='%23E53935' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M34 44l-4-4 4-4M30 40h10' stroke='%23E53935' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round' transform='rotate(90 34 40)'/></svg>") !important;
+        background-repeat: no-repeat !important;
+        background-position: center 60px !important;
+        border: 2px dashed var(--red-border) !important;
+        border-radius: 24px !important;
+        padding: 180px 40px 56px !important;
+        min-height: 340px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+      }
+      [data-testid="stFileUploaderDropzone"]:hover {
+        border-color: var(--red) !important;
+        background-color: #FFFAFA !important;
+      }
+
+      /* 기본 영어 지시문·버튼 모두 숨김 */
+      [data-testid="stFileUploaderDropzoneInstructions"],
+      [data-testid="stFileUploaderDropzone"] > button {
+        display: none !important;
+      }
+
+      /* 커스텀 2줄 안내 */
+      [data-testid="stFileUploaderDropzone"]::before {
+        content: '제안서 파일을 이곳에 놓아주세요';
+        font-size: 19px; font-weight: 700;
+        color: var(--ink);
         letter-spacing: -0.025em;
+        margin-bottom: 10px;
+      }
+      [data-testid="stFileUploaderDropzone"]::after {
+        content: 'PDF 파일을 드래그하거나 클릭하여 시작하세요';
+        font-size: 14px; font-weight: 500;
+        color: #8A8A8A;
+        letter-spacing: -0.01em;
+      }
+
+      /* ── 업로드 후 파일 칩 ── */
+      /* 파일이 붙으면 드롭존은 숨기고 파일 칩만 표시 */
+      [data-testid="stFileUploader"]:has([data-testid="stFileUploaderFile"])
+        [data-testid="stFileUploaderDropzone"] {
+        display: none !important;
+      }
+
+      [data-testid="stFileUploaderFile"] {
+        background: #FFFFFF !important;
+        border: 1px solid #E8E8E8 !important;
+        border-radius: 14px !important;
+        padding: 16px 22px !important;
+        margin-top: 0 !important;
+        align-items: center !important;
+      }
+      [data-testid="stFileUploaderFile"] [data-testid="stFileUploaderFileName"] {
+        font-size: 15px; font-weight: 600; color: var(--ink);
+        letter-spacing: -0.015em;
+      }
+
+      /* 삭제(X) 버튼을 "파일 취소 하기" 라벨로 교체 */
+      [data-testid="stFileUploaderDeleteBtn"] {
+        background: #F5F5F5 !important;
+        border: 1px solid #E0E0E0 !important;
+        border-radius: 999px !important;
+        padding: 9px 18px !important;
+        color: var(--muted) !important;
+      }
+      [data-testid="stFileUploaderDeleteBtn"] svg { display: none !important; }
+      [data-testid="stFileUploaderDeleteBtn"]::after {
+        content: '파일 취소 하기';
+        font-size: 13px; font-weight: 500;
+        letter-spacing: -0.01em;
+      }
+
+      /* ── 하단 안내문 ── */
+      .hero-footnote {
+        text-align: center;
+        font-size: 12px; color: #9A9A9A;
+        margin-top: 24px;
+        letter-spacing: -0.01em;
+      }
+
+      /* ── 헤딩 선명도 ── */
+      h1, h2, h3 { font-weight: 700 !important; letter-spacing: -0.025em; }
+
+      /* ── 반응형 ── */
+      @media (max-width: 768px) {
+        .hero-title { font-size: 40px; }
+        [data-testid="stFileUploaderDropzone"] {
+          padding: 150px 24px 40px !important;
+          min-height: 280px !important;
+          background-position: center 44px !important;
+        }
       }
     </style>
     """, unsafe_allow_html=True)
 
-    st.markdown(
-        "<h1 style='font-size: 26px; margin-bottom: 4px;'>"
-        "<span style='color: #E53935;'>메리츠</span> 암 보장 분석기</h1>"
-        "<p style='color: #6A6A6A; font-size: 14px; margin-bottom: 24px;'>"
-        "가입제안서 PDF를 올리시면 고객이 받을 수 있는 암 치료비를 자동으로 분석해 드립니다.</p>",
-        unsafe_allow_html=True
-    )
+    # ─────────────────────────────────────────────────────────────
+    # Hero 헤더
+    # ─────────────────────────────────────────────────────────────
+    st.markdown("""
+    <div class="hero-wrap">
+      <div class="hero-badge">메리츠화재 "비공식" 매니저 분석지원</div>
+      <h1 class="hero-title"><span class="hl">암 치료비</span> 보장금액 분석</h1>
+      <p class="hero-subtitle">
+        가입제안서 PDF를 업로드하면,<br>
+        보장내역 중 <b>암 치료비 파트만</b> 추출 합니다
+      </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     uploaded = st.file_uploader(
         "가입제안서 PDF를 업로드하세요",
@@ -419,7 +561,12 @@ def main():
     )
 
     if not uploaded:
-        st.info("PDF를 업로드하시면 자동으로 분석 결과가 생성됩니다.")
+        st.markdown(
+            '<p class="hero-footnote">'
+            '* 가입제안서안에 있는 담보 가입금액을 꼭 계산해보고 참고용으로만 사용하세요'
+            '</p>',
+            unsafe_allow_html=True,
+        )
         return
 
     pdf_bytes = uploaded.read()
