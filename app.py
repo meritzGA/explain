@@ -580,10 +580,44 @@ def main():
 
     pdf_bytes = uploaded.read()
 
-    # ── 업로드 후: 드롭존 강제 숨김 (CSS :has()가 안 먹는 환경 대응) ──
+    # ── 업로드 후: 드롭존을 축소하여 "다른 제안서" 업로드 가능하게 유지 ──
     st.markdown("""
     <style>
       [data-testid="stFileUploaderDropzone"] {
+        min-height: 0 !important;
+        max-height: 56px !important;
+        padding: 0 24px !important;
+        overflow: hidden !important;
+        background-image: none !important;
+        border: 1px solid #E0E0E0 !important;
+        border-radius: 14px !important;
+        border-style: solid !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+      [data-testid="stFileUploaderDropzone"]:hover {
+        border-color: var(--red) !important;
+        background-color: #FFFAFA !important;
+      }
+      [data-testid="stFileUploaderDropzone"] > *,
+      [data-testid="stFileUploaderDropzone"] > * * {
+        opacity: 0 !important;
+      }
+      [data-testid="stFileUploaderDropzone"]::before {
+        content: '다른 제안서 분석하기';
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 14px; font-weight: 600;
+        color: var(--muted);
+        letter-spacing: -0.015em;
+        pointer-events: none;
+        opacity: 1 !important;
+        z-index: 1;
+      }
+      [data-testid="stFileUploaderDropzone"]::after {
         display: none !important;
       }
     </style>
