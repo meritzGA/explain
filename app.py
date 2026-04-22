@@ -350,7 +350,7 @@ def render_html(processed: dict) -> str:
 
 def main():
     st.set_page_config(
-        page_title="암 치료비 보장금액 분석",
+        page_title="암 담보 보장금액 분석기",
         layout="wide",
         initial_sidebar_state="collapsed",
     )
@@ -466,7 +466,7 @@ def main():
 
       /* 커스텀 2줄 안내 — absolute 포지셔닝으로 오버레이 */
       [data-testid="stFileUploaderDropzone"]::before {
-        content: '제안서 파일을 이곳에 놓아주세요';
+        content: '제안서 PDF를 여기에 올려주세요';
         position: absolute;
         top: 160px; left: 0; right: 0;
         text-align: center;
@@ -478,7 +478,7 @@ def main():
         z-index: 1;
       }
       [data-testid="stFileUploaderDropzone"]::after {
-        content: 'PDF 파일을 드래그하거나 클릭하여 시작하세요';
+        content: '파일을 끌어놓거나 클릭해서 선택하세요';
         position: absolute;
         top: 196px; left: 0; right: 0;
         text-align: center;
@@ -555,16 +555,16 @@ def main():
     st.markdown("""
     <div class="hero-wrap">
       <div class="hero-badge">메리츠화재 "비공식" 매니저 분석지원</div>
-      <h1 class="hero-title"><span class="hl">암 치료비</span> 보장금액 분석</h1>
+      <h1 class="hero-title"><span class="hl">암 담보</span> 보장금액 분석기</h1>
       <p class="hero-subtitle">
-        가입제안서 PDF를 업로드하면,<br>
-        보장내역 중 <b>암 치료비 파트만</b> 추출 합니다
+        제안서를 올리면<br>
+        <b>암 관련 담보</b>를 자동으로 분석합니다
       </p>
     </div>
     """, unsafe_allow_html=True)
 
     uploaded = st.file_uploader(
-        "가입제안서 PDF를 업로드하세요",
+        "제안서 PDF 선택",
         type="pdf",
         label_visibility="collapsed",
     )
@@ -572,7 +572,7 @@ def main():
     if not uploaded:
         st.markdown(
             '<p class="hero-footnote">'
-            '* 가입제안서안에 있는 담보 가입금액을 꼭 계산해보고 참고용으로만 사용하세요'
+            '* 담보 가입금액을 단순 계산한 참고자료입니다. 정확한 보장 내용은 제안서 원본을 확인하세요'
             '</p>',
             unsafe_allow_html=True,
         )
@@ -606,7 +606,7 @@ def main():
         opacity: 0 !important;
       }
       [data-testid="stFileUploaderDropzone"]::before {
-        content: '다른 제안서 분석하기';
+        content: '다른 제안서 올리기';
         position: absolute;
         top: 50%; left: 50%;
         transform: translate(-50%, -50%);
