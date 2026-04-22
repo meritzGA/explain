@@ -476,25 +476,29 @@ button, input, select, textarea { font-family: var(--font-sans); }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-/* ── 보장금액 한 줄 자동 맞춤 ── */
-(function() {
-  function fitAmounts() {
-    document.querySelectorAll('.tx-total-amount').forEach(function(el) {
-      var raw = el.textContent.replace(/\s+/g, '');
-      if (raw !== el.textContent.replace(/\s+/g, '')) el.textContent = raw;
+/* ── 보장금액 한 줄 자동 맞춤 (전역 — 캡처 전에도 호출) ── */
+function fitAmounts() {
+  document.querySelectorAll('.tx-total-amount').forEach(function(el) {
+    /* 줄바꿈·공백 제거: "1,500만원~\n3,000만원" → "1,500만원~3,000만원" */
+    var cleaned = el.textContent.replace(/\s+/g, '');
+    if (cleaned !== el.textContent) el.textContent = cleaned;
 
-      var parent = el.closest('.tx-total');
-      if (!parent) return;
-      var maxW = parent.offsetWidth;
-      var fs = 24;
+    var parent = el.closest('.tx-total');
+    if (!parent) return;
+    var maxW = parent.offsetWidth;
+
+    /* 24px에서 시작, 넘치면 0.5px씩 줄여 14px까지 */
+    var fs = 24;
+    el.style.fontSize = fs + 'px';
+    while (el.scrollWidth > maxW && fs > 14) {
+      fs -= 0.5;
       el.style.fontSize = fs + 'px';
+    }
+  });
+}
 
-      while (el.scrollWidth > maxW && fs > 14) {
-        fs -= 0.5;
-        el.style.fontSize = fs + 'px';
-      }
-    });
-  }
+/* 페이지 로드 시 실행 */
+(function() {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() { setTimeout(fitAmounts, 100); });
   } else {
@@ -516,6 +520,9 @@ async function saveAsImage() {
   btn.disabled = true;
 
   try {
+    /* ★ 캡처 직전 폰트 크기 재계산 */
+    fitAmounts();
+
     var canvas = await html2canvas(target, {
       scale: 2,
       backgroundColor: '#FFFFFF',
