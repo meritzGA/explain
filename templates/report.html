@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>{{ customer.name }} 고객 보장요약</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+               "Noto Sans KR", "Malgun Gothic", sans-serif;
+  color: #1F1D2B;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+  background: #F8F7F4;
+}
+.page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+  background: #fff;
+}
+h1, h2, h3 { margin: 0; font-weight: 500; letter-spacing: -0.3px; }
+
+/* 문서 헤더 */
+.doc-head {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  padding: 20px 24px; border-radius: 12px; background: #1F1D2B; color: #fff;
+  gap: 20px; flex-wrap: wrap; margin-bottom: 20px;
+}
+.doc-head .kicker { font-size: 14px; color: #F5C4B3; margin-bottom: 6px; }
+.doc-head .title { font-size: 22px; font-weight: 500; }
+.doc-head .meta { font-size: 15px; color: #B4B2A9; margin-top: 4px; }
+.doc-head-right { text-align: right; }
+.doc-head-right .label { font-size: 13px; color: #B4B2A9; margin-bottom: 3px; }
+.doc-head-right .value { font-size: 22px; font-weight: 500; }
+
+/* 메리 insight 히어로 */
+.insight-hero {
+  background: #F1EFE8;
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.insight-mascot {
+  flex-shrink: 0;
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: #FAECE7;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.insight-body { flex: 1; min-width: 0; }
+.insight-tagline {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 14px; color: #5F5E5A; margin-bottom: 10px;
+}
+.insight-tagline .shield {
+  display: inline-block; width: 16px; height: 16px; background: #C44D25;
+  clip-path: polygon(50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%, 0 30%);
+}
+.insight-tagline strong { color: #1F1D2B; font-weight: 500; }
+.insight-kicker {
+  font-size: 18px; line-height: 1.6; margin-bottom: 4px;
+}
+.insight-kicker .name { color: #C44D25; font-weight: 500; }
+.insight-kicker .emphasis { color: #C44D25; font-weight: 500; }
+.insight-amount {
+  font-size: 44px; font-weight: 500; color: #C44D25;
+  letter-spacing: -1px; line-height: 1.1; margin: 8px 0;
+}
+.insight-amount .suffix { font-size: 20px; color: #5F5E5A; font-weight: 400; margin-left: 8px; }
+.insight-disclaimer { font-size: 12px; color: #888780; margin-top: 10px; line-height: 1.5; }
+
+/* 섹션 구분 */
+.section-title {
+  font-size: 20px; font-weight: 500;
+  padding-left: 12px; border-left: 4px solid #C44D25;
+  margin: 30px 0 20px; line-height: 1.2;
+}
+
+/* 집계 헤더 */
+.coverage-total-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin: 20px 0 16px;
+}
+.coverage-total-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 17px; font-weight: 500; color: #C44D25;
+}
+.coverage-total-label::before {
+  content: ''; display: inline-block; width: 16px; height: 16px; background: #C44D25;
+  clip-path: polygon(50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%, 0 30%);
+}
+.coverage-total-value { font-size: 18px; font-weight: 500; color: #C44D25; }
+
+/* 치료 방식별 카드 그리드 */
+.tx-grid {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;
+}
+.tx-card {
+  background: #fff; border: 0.5px solid rgba(0,0,0,0.15);
+  border-radius: 16px; padding: 22px 22px 18px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.tx-card-head {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+}
+.tx-icon {
+  width: 46px; height: 46px; border: 1.5px solid #1F1D2B;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.tx-total { text-align: right; min-width: 0; }
+.tx-total-label {
+  font-size: 11px; letter-spacing: 0.06em; color: #888780; margin-bottom: 3px;
+}
+.tx-total-amount {
+  font-size: 22px; font-weight: 500; color: #C44D25;
+  letter-spacing: -0.4px; line-height: 1.2; white-space: pre-line;
+}
+.tx-card-label {
+  font-size: 16px; font-weight: 500;
+  padding-top: 12px; border-top: 0.5px solid rgba(0,0,0,0.12);
+}
+.tx-breakdown { display: flex; flex-direction: column; gap: 10px; }
+.tx-group { font-size: 13px; }
+.tx-group-head {
+  color: #1F1D2B; font-weight: 400;
+  display: flex; gap: 4px; align-items: flex-start; line-height: 1.4;
+}
+.tx-group-head::before { content: '┗ '; color: #888780; flex-shrink: 0; }
+.tx-items { margin-left: 14px; display: flex; flex-direction: column; gap: 3px; }
+.tx-item {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 12px; color: #5F5E5A; gap: 8px; line-height: 1.4;
+}
+.tx-item-label { display: flex; gap: 3px; }
+.tx-item-label::before { content: '┗ '; color: #B4B2A9; }
+.tx-item-val { font-weight: 500; color: #C44D25; white-space: nowrap; }
+
+@media (max-width: 900px) { .tx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .tx-grid { grid-template-columns: 1fr; } }
+
+/* 기존 이벤트 카드 */
+.card {
+  border-radius: 12px; overflow: hidden;
+  border: 0.5px solid rgba(0,0,0,0.10); background: #fff; margin-bottom: 20px;
+}
+.card-band {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 24px; color: #fff;
+}
+.card-band-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border-radius: 50%;
+  background: rgba(255,255,255,0.18); flex-shrink: 0;
+}
+.card-band-kicker { font-size: 16px; font-weight: 500; }
+.card-body { padding: 24px 28px 20px; }
+.card-q { font-size: 21px; font-weight: 500; margin-bottom: 14px; line-height: 1.35; }
+.card-a { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.card-a .amount { font-size: 44px; font-weight: 500; letter-spacing: -1px; line-height: 1.05; }
+.card-a .unit { font-size: 22px; color: #5F5E5A; font-weight: 400; }
+.card-desc { font-size: 16px; color: #5F5E5A; line-height: 1.6; margin-bottom: 14px; }
+
+.detail { margin: 18px -4px 0; background: #F1EFE8; border-radius: 8px; padding: 18px 22px; }
+.detail-title {
+  font-size: 13px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px;
+}
+.row {
+  display: flex; justify-content: space-between; gap: 20px;
+  padding: 12px 0; border-bottom: 0.5px solid rgba(0,0,0,0.10);
+}
+.row:last-child { border-bottom: none; padding-bottom: 4px; }
+.row-name { font-size: 17px; flex: 1; min-width: 0; }
+.row-val { font-size: 17px; font-weight: 500; white-space: nowrap; }
+.subgroup { margin-top: 12px; }
+.subgroup:first-child { margin-top: 0; }
+.subgroup-head {
+  font-size: 15px; font-weight: 500; margin-bottom: 4px;
+  padding-top: 12px; border-top: 0.5px solid rgba(0,0,0,0.10);
+}
+.subgroup:first-child .subgroup-head { padding-top: 0; border-top: none; }
+
+/* 그 밖에 보장 */
+.extras-wrap {
+  padding: 22px 4px 0; margin-top: 4px;
+  border-top: 1px solid rgba(0,0,0,0.15);
+}
+.extras-head { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
+.extras-desc { font-size: 15px; color: #5F5E5A; margin-bottom: 16px; }
+.extras-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;
+}
+.extra {
+  background: #fff; border: 0.5px solid rgba(0,0,0,0.10);
+  border-radius: 8px; padding: 16px 18px; position: relative; overflow: hidden;
+}
+.extra-bar { position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+.extra .v { font-size: 20px; font-weight: 500; margin-bottom: 6px; }
+.extra .n { font-size: 13px; color: #5F5E5A; line-height: 1.55; }
+
+/* 푸터 */
+.doc-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 30px; gap: 20px; flex-wrap: wrap;
+}
+.disclaimer { font-size: 12px; color: #888780; flex: 1; min-width: 0; text-align: right; line-height: 1.5; }
+.feedback-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 18px;
+  background: #fff; color: #C44D25;
+  border: 1px solid #F5C4B3; border-radius: 100px;
+  font-size: 14px; cursor: pointer; text-decoration: none; white-space: nowrap;
+}
+.feedback-btn::before { content: '⚠'; font-size: 13px; }
+
+/* 인쇄 최적화 */
+@media print {
+  body { background: #fff; }
+  .page { max-width: 100%; padding: 0; }
+  .card, .tx-card, .insight-hero { page-break-inside: avoid; }
+  .card-band, .insight-amount, .tx-total-amount {
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .feedback-btn { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="doc-head">
+    <div>
+      <div class="kicker">{{ customer.name }} 고객님이 받으실 수 있는 보험금</div>
+      <div class="title">{{ policy.product_name_short }}</div>
+      <div class="meta">
+        {{ customer.gender or '' }}{% if customer.age %} {{ customer.age }}세{% endif %}
+        · {{ policy.period_description }}
+        {% if policy.start_date and policy.end_date %}· {{ policy.start_date }} ~ {{ policy.end_date }}{% endif %}
+      </div>
+    </div>
+    <div class="doc-head-right">
+      <div class="label">월 보험료</div>
+      <div class="value">{{ "{:,}".format(policy.premium_monthly) }} 원</div>
+    </div>
+  </div>
+
+  {% if headline %}
+  <div class="insight-hero">
+    <div class="insight-mascot">
+      <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="28" cy="25" r="14" fill="#C44D25"/>
+        <circle cx="23" cy="24" r="1.8" fill="#fff"/>
+        <circle cx="33" cy="24" r="1.8" fill="#fff"/>
+        <path d="M23 31 Q28 34 33 31" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <rect x="20" y="41" width="16" height="10" rx="2" fill="#1F1D2B"/>
+        <text x="28" y="48" text-anchor="middle" fill="#fff" font-size="5" font-weight="700">EXPERT</text>
+      </svg>
+    </div>
+    <div class="insight-body">
+      <div class="insight-tagline">
+        <span class="shield"></span>
+        <span>보험전문가 <strong>메리</strong>의 insight : 전문 통계에 의하면 암치료는 5년정도 받는대요!</span>
+      </div>
+      <div class="insight-kicker">
+        <span class="name">{{ customer.name }}</span>님이 <span class="emphasis">5년간</span> 보장받을 수 있는 <span class="emphasis">암 치료비</span>는 최대
+      </div>
+      <div class="insight-amount">
+        {{ headline.five_year_min_display }} ~ {{ headline.five_year_max_display }}<span class="suffix">입니다.</span>
+      </div>
+      <div class="insight-disclaimer">
+        * 위 금액은 아래 과정에서 산출된 암 치료비 합산의 단순히 5배를 곱한 값입니다. 실제 보장금액과 상이합니다.
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if treatment_cards %}
+  <div class="section-title">보장 내역 한눈에 보기</div>
+
+  <div class="coverage-total-head">
+    <div class="coverage-total-label">집계된 암 치료 보장금액 합계</div>
+    <div class="coverage-total-value">
+      {{ headline.annual_min_display }} ~ {{ headline.annual_max_display }}
+    </div>
+  </div>
+
+  <div class="tx-grid">
+    {% for card in treatment_cards %}
+    <div class="tx-card">
+      <div class="tx-card-head">
+        <div class="tx-icon">{{ tx_icon(card.icon) | safe }}</div>
+        <div class="tx-total">
+          <div class="tx-total-label">COVERAGE TOTAL</div>
+          <div class="tx-total-amount">{{ card.subtotal_display }}</div>
+        </div>
+      </div>
+      <div class="tx-card-label">{{ card.label }}</div>
+      <div class="tx-breakdown">
+        {% for group in card.groups %}
+        <div class="tx-group">
+          <div class="tx-group-head">{{ group.coverage_name_short }}</div>
+          <div class="tx-items">
+            {% for it in group.item_list %}
+            <div class="tx-item">
+              <span class="tx-item-label">{{ it.label }}</span>
+              <span class="tx-item-val">{{ it.display }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% set remaining_events = events | rejectattr('id', 'equalto', 'cancer_treatment') | list %}
+  {% if remaining_events %}
+  <div class="section-title">그 외 보장 이벤트</div>
+
+  {% for event in remaining_events %}
+  <div class="card">
+    <div class="card-band" style="background: {{ event.color.band }};">
+      <div class="card-band-icon">{{ icon_svg(event.icon) | safe }}</div>
+      <div class="card-band-kicker">{{ event.label }}</div>
+    </div>
+    <div class="card-body">
+      <div class="card-q">{{ event.question }}</div>
+      <div class="card-a">
+        <span class="amount" style="color: {{ event.color.text }};">{{ event.amount_display }}</span>
+        {% if event.unit %}<span class="unit">{{ event.unit }}</span>{% endif %}
+      </div>
+      {% if event.description %}<div class="card-desc">{{ event.description }}</div>{% endif %}
+
+      <div class="detail">
+        {% if event.subgroups %}
+          {% for sg in event.subgroups %}
+          <div class="subgroup">
+            <div class="subgroup-head" style="color: {{ event.color.text }};">{{ sg.label }}</div>
+            {% for cov in sg.coverages %}
+            <div class="row">
+              <div class="row-name">{{ cov.name }}</div>
+              <div class="row-val">{{ cov.amount_display }}</div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="detail-title" style="color: {{ event.color.text }};">산출 근거</div>
+          {% for cov in event.coverages %}
+          <div class="row">
+            <div class="row-name">{{ cov.name }}</div>
+            <div class="row-val">{{ cov.amount_display }}</div>
+          </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if extras %}
+  <div class="extras-wrap">
+    <div class="extras-head">그 밖에 보장되는 항목</div>
+    <div class="extras-desc">주요 이벤트에 포함되지 않는 추가 보장들입니다.</div>
+    <div class="extras-grid">
+      {% for cov in extras %}
+      <div class="extra">
+        <div class="extra-bar" style="background: #888780;"></div>
+        <div class="v">{{ cov.amount_display }}</div>
+        <div class="n">{{ cov.name | replace('┗ ', '') | replace('(건강가입)', '') | replace('(통합간편가입)', '') | replace('(31간편가입)', '') | replace('(맞춤간편가입)', '') }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="doc-footer">
+    <button class="feedback-btn" onclick="alert('피드백 감사합니다. 담당 지점장에게 전달됩니다.');">오류가 생겼나요?</button>
+    <div class="disclaimer">
+      * 가입제안서를 기반으로 작성한 내용이며, 실제 값과 상이할 수 있습니다. 가입제안서를 확인해주세요
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
