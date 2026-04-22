@@ -355,13 +355,50 @@ def main():
         initial_sidebar_state="collapsed",
     )
 
-    # Streamlit 기본 여백 최소화 + 깔끔한 배경
+    # ── Pretendard 폰트 CDN 로드 + Streamlit UI 전역 스타일 ──
     st.markdown("""
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="stylesheet" as="style" crossorigin
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
     <style>
+      /* 폰트 토큰 */
+      :root {
+        --font-sans: 'Pretendard Variable', Pretendard,
+                     -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto,
+                     'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+      }
+
+      /* Streamlit 전 요소에 폰트 강제 상속
+         - html/body에 지정만으로는 [class*="st-"] 내부에서 깨지는 경우가 있어
+           넓은 선택자로 !important를 걸어둠 */
+      html, body, [class*="st-"], [class*="css-"],
+      [data-testid="stAppViewContainer"],
+      [data-testid="stSidebar"],
+      [data-testid="stMarkdownContainer"],
+      [data-testid="stFileUploader"],
+      [data-testid="stFileUploader"] *,
+      [data-testid="stDownloadButton"] *,
+      [data-testid="stExpander"] *,
+      [data-testid="stAlert"] *,
+      [data-testid="stDataFrame"] *,
+      button, input, textarea, select {
+        font-family: var(--font-sans) !important;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        font-feature-settings: 'tnum' on, 'lnum' on;
+      }
+
+      /* 기본 레이아웃 */
       .block-container { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 1240px; }
       [data-testid="stHeader"] { background: transparent; }
       .stApp { background: #EEEEEE; }
-      h1, h2 { font-weight: 700 !important; }
+
+      /* 헤딩 선명도 */
+      h1, h2, h3 {
+        font-weight: 700 !important;
+        letter-spacing: -0.025em;
+      }
     </style>
     """, unsafe_allow_html=True)
 
