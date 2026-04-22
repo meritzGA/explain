@@ -4,18 +4,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ customer.name }} 고객 암 보장 분석</title>
+
+<!-- ── Pretendard 폰트 (가변 폰트, 한글 동적 서브셋) ── -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" as="style" crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+
 <style>
 *, *::before, *::after { box-sizing: border-box; }
+
+/* ── 폰트 토큰: 한 곳에서 관리 ── */
+:root {
+  --font-sans: 'Pretendard Variable', Pretendard,
+               -apple-system, BlinkMacSystemFont,
+               system-ui, 'Segoe UI', Roboto,
+               'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
-               "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-family: var(--font-sans);
   color: #1F1F1F;
   line-height: 1.5;
   margin: 0;
   padding: 0;
   background: #EEEEEE;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* 숫자 tabular/lining — 금액 정렬이 일정해짐 */
+  font-feature-settings: 'tnum' on, 'lnum' on, 'ss03' on;
 }
+
+/* 모든 자식 요소가 같은 폰트 사용하도록 (기존 font-family: inherit 누락 요소 대응) */
+button, input, select, textarea { font-family: var(--font-sans); }
 
 /* 최외곽 둥근 흰 패널 */
 .page-shell {
@@ -52,8 +73,8 @@ body {
   border-left: 1px solid #FEE4E4;
   border-bottom: 1px solid #FEE4E4;
 }
-.file-chip-name { font-size: 15px; font-weight: 500; color: #1F1F1F; }
-.file-chip-size { font-size: 13px; color: #A0A0A0; margin-top: 2px; }
+.file-chip-name { font-size: 15px; font-weight: 500; color: #1F1F1F; letter-spacing: -0.01em; }
+.file-chip-size { font-size: 13px; color: #A0A0A0; margin-top: 2px; letter-spacing: -0.01em; }
 
 /* ── 메리 인사이트 박스 ── */
 .mery-box {
@@ -94,6 +115,8 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
+  letter-spacing: -0.015em;
+  font-weight: 400;
 }
 .mery-tagline .shield-small {
   display: inline-block;
@@ -110,13 +133,14 @@ body {
   line-height: 1.55;
   margin-bottom: 4px;
   font-weight: 500;
+  letter-spacing: -0.025em;
 }
 .mery-kicker .red { color: #E53935; font-weight: 700; }
 .mery-amount {
   font-size: 48px;
-  font-weight: 700;
+  font-weight: 800;
   color: #E53935;
-  letter-spacing: -1.5px;
+  letter-spacing: -0.035em;
   line-height: 1.1;
   margin: 10px 0 2px;
 }
@@ -125,13 +149,14 @@ body {
   color: #1F1F1F;
   font-weight: 500;
   margin-left: 8px;
-  letter-spacing: 0;
+  letter-spacing: -0.02em;
 }
 .mery-disclaimer {
   font-size: 12px;
   color: #9A9A9A;
   margin-top: 14px;
   line-height: 1.5;
+  letter-spacing: -0.01em;
 }
 
 /* ── 섹션 타이틀 ── */
@@ -143,6 +168,7 @@ body {
   border-left: 4px solid #E53935;
   line-height: 1.2;
   margin: 48px 0 36px;
+  letter-spacing: -0.02em;
 }
 
 /* ── 집계 합계 헤더 ── */
@@ -160,6 +186,7 @@ body {
   font-size: 16px;
   font-weight: 600;
   color: #E53935;
+  letter-spacing: -0.015em;
 }
 .total-bar-left .shield-small {
   width: 16px; height: 18px;
@@ -169,8 +196,9 @@ body {
 }
 .total-bar-right {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   color: #6A6A6A;
+  letter-spacing: -0.02em;
 }
 
 /* ── 치료 카드 그리드 3×3 ── */
@@ -209,17 +237,17 @@ body {
 }
 .tx-total-label {
   font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   color: #9A9A9A;
   margin-bottom: 6px;
 }
 .tx-total-amount {
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 800;
   color: #E53935;
   line-height: 1.15;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.03em;
   white-space: pre-line;
 }
 
@@ -232,6 +260,7 @@ body {
   font-weight: 700;
   color: #1F1F1F;
   margin-bottom: 14px;
+  letter-spacing: -0.02em;
 }
 
 .tx-coverage-group { margin-bottom: 12px; }
@@ -244,6 +273,7 @@ body {
   line-height: 1.45;
   padding-left: 4px;
   margin-bottom: 6px;
+  letter-spacing: -0.015em;
 }
 .tx-coverage-line::before {
   content: '┗ ';
@@ -264,6 +294,7 @@ body {
   font-size: 12px;
   color: #9A9A9A;
   line-height: 1.4;
+  letter-spacing: -0.01em;
 }
 .tx-item-label::before {
   content: '┗ ';
@@ -275,6 +306,7 @@ body {
   font-weight: 700;
   color: #E53935;
   white-space: nowrap;
+  letter-spacing: -0.02em;
 }
 
 /* ── 하단 영역 ── */
@@ -291,6 +323,7 @@ body {
   color: #E53935;
   border: 1px solid #FBD4D4;
   font-size: 13px;
+  font-weight: 500;
   padding: 9px 18px;
   border-radius: 100px;
   display: inline-flex;
@@ -298,6 +331,7 @@ body {
   gap: 6px;
   cursor: pointer;
   font-family: inherit;
+  letter-spacing: -0.015em;
 }
 .feedback::before {
   content: '!';
@@ -318,6 +352,7 @@ body {
   flex: 1;
   min-width: 0;
   line-height: 1.5;
+  letter-spacing: -0.01em;
 }
 
 /* ── 인쇄 최적화 ── */
