@@ -47,10 +47,10 @@ button, input, select, textarea { font-family: var(--font-sans); }
   padding: 24px 36px 28px;
 }
 
-/* ── 메리 인사이트 박스 ── */
+/* ── 메리 인사이트 박스 (다크 모드) ── */
 .mery-box {
-  background: #FAFAFA;
-  border: 1px solid #EAEAEA;
+  background: #1A1A2E;
+  border: none;
   border-radius: 18px;
   padding: 20px 28px;
   display: flex;
@@ -69,7 +69,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
   bottom: 4px;
   left: 50%;
   transform: translateX(-50%);
-  background: #1F1F1F;
+  background: rgba(255,255,255,0.15);
   color: #FFFFFF;
   font-size: 9px;
   font-weight: 700;
@@ -81,7 +81,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
 .mery-body { flex: 1; min-width: 0; }
 .mery-tagline {
   font-size: 13px;
-  color: #6A6A6A;
+  color: rgba(255,255,255,0.55);
   margin-bottom: 6px;
   display: flex;
   align-items: center;
@@ -92,25 +92,26 @@ button, input, select, textarea { font-family: var(--font-sans); }
 .mery-tagline .shield-small {
   display: inline-block;
   width: 14px; height: 16px;
-  background: #E53935;
+  background: #FF6B6B;
   -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2L4 6v6c0 5 3.5 9.5 8 10 4.5-0.5 8-5 8-10V6z'/></svg>") center/contain no-repeat;
           mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2L4 6v6c0 5 3.5 9.5 8 10 4.5-0.5 8-5 8-10V6z'/></svg>") center/contain no-repeat;
   flex-shrink: 0;
 }
-.mery-tagline strong { color: #E53935; font-weight: 700; }
+.mery-tagline strong { color: #FF6B6B; font-weight: 700; }
 .mery-kicker {
   font-size: 17px;
-  color: #1F1F1F;
+  color: rgba(255,255,255,0.85);
   line-height: 1.45;
   margin-bottom: 2px;
   font-weight: 500;
   letter-spacing: -0.025em;
 }
-.mery-kicker .red { color: #E53935; font-weight: 700; }
+.mery-kicker .red { color: #FF6B6B; font-weight: 700; }
+.mery-kicker .name { color: #FFC857; font-weight: 700; }
 .mery-amount {
   font-size: 38px;
   font-weight: 800;
-  color: #E53935;
+  color: #FFFFFF;
   letter-spacing: -0.035em;
   line-height: 1.1;
   margin: 4px 0 2px;
@@ -119,14 +120,14 @@ button, input, select, textarea { font-family: var(--font-sans); }
 }
 .mery-amount .suffix {
   font-size: 18px;
-  color: #1F1F1F;
+  color: rgba(255,255,255,0.6);
   font-weight: 500;
   margin-left: 6px;
   letter-spacing: -0.02em;
 }
 .mery-disclaimer {
   font-size: 11px;
-  color: #9A9A9A;
+  color: rgba(255,255,255,0.35);
   margin-top: 6px;
   line-height: 1.5;
   letter-spacing: -0.01em;
@@ -136,9 +137,9 @@ button, input, select, textarea { font-family: var(--font-sans); }
 .section-title {
   font-size: 16px;
   font-weight: 700;
-  color: #1F1F1F;
+  color: #1A1A2E;
   padding-left: 10px;
-  border-left: 4px solid #E53935;
+  border-left: 4px solid #D32F2F;
   line-height: 1.2;
   margin: 20px 0 14px;
   letter-spacing: -0.02em;
@@ -158,19 +159,19 @@ button, input, select, textarea { font-family: var(--font-sans); }
   gap: 6px;
   font-size: 14px;
   font-weight: 600;
-  color: #E53935;
+  color: #D32F2F;
   letter-spacing: -0.015em;
 }
 .total-bar-left .shield-small {
   width: 14px; height: 16px;
-  background: #E53935;
+  background: #D32F2F;
   -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2L4 6v6c0 5 3.5 9.5 8 10 4.5-0.5 8-5 8-10V6z'/></svg>") center/contain no-repeat;
           mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2L4 6v6c0 5 3.5 9.5 8 10 4.5-0.5 8-5 8-10V6z'/></svg>") center/contain no-repeat;
 }
 .total-bar-right {
   font-size: 15px;
   font-weight: 700;
-  color: #6A6A6A;
+  color: #1A1A2E;
   letter-spacing: -0.02em;
 }
 
@@ -184,7 +185,8 @@ button, input, select, textarea { font-family: var(--font-sans); }
 .tx-card {
   background: #FFFFFF;
   border: 1px solid #EEEEEE;
-  border-radius: 14px;
+  border-left: 3px solid #D32F2F;
+  border-radius: 0 14px 14px 0;
   padding: 14px 16px 12px;
   display: flex;
   flex-direction: column;
@@ -198,9 +200,16 @@ button, input, select, textarea { font-family: var(--font-sans); }
 }
 .tx-icon {
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
+  background: #FFF5F5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
 }
+.tx-icon svg { width: 100%; height: 100%; }
 .tx-total {
   text-align: right;
   flex: 1;
@@ -209,14 +218,18 @@ button, input, select, textarea { font-family: var(--font-sans); }
 .tx-total-label {
   font-size: 9px;
   font-weight: 600;
-  letter-spacing: 0.12em;
-  color: #9A9A9A;
-  margin-bottom: 2px;
+  letter-spacing: 0.08em;
+  color: #D32F2F;
+  margin-bottom: 3px;
+  background: #FFF0F0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
 }
 .tx-total-amount {
   font-size: 20px;
   font-weight: 800;
-  color: #E53935;
+  color: #D32F2F;
   line-height: 1.15;
   letter-spacing: -0.03em;
   white-space: nowrap;
@@ -230,7 +243,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
 .tx-title {
   font-size: 13px;
   font-weight: 700;
-  color: #1F1F1F;
+  color: #1A1A2E;
   margin-bottom: 6px;
   letter-spacing: -0.02em;
 }
@@ -283,7 +296,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
 .tx-item-val {
   font-size: 11px;
   font-weight: 700;
-  color: #E53935;
+  color: #D32F2F;
   white-space: nowrap;
   flex-shrink: 0;
   letter-spacing: -0.02em;
@@ -302,7 +315,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #111827;
+  background: #1A1A2E;
   color: #FFFFFF;
   border: none;
   padding: 12px 24px;
@@ -314,7 +327,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
   letter-spacing: -0.015em;
   transition: background 0.15s ease;
 }
-.save-btn:hover { background: #000000; }
+.save-btn:hover { background: #12121F; }
 .save-btn:disabled { background: #9CA3AF; cursor: not-allowed; }
 .save-btn svg { flex-shrink: 0; }
 .disclaimer {
@@ -331,7 +344,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
   body { background: #FFFFFF; }
   .page-shell { margin: 0; max-width: 100%; padding: 20px; border-radius: 0; }
   .tx-card, .mery-box { page-break-inside: avoid; }
-  .mery-amount, .tx-total-amount, .tx-item-val {
+  .mery-box, .mery-amount, .tx-total-amount, .tx-item-val, .tx-total-label {
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   .action-bar { display: none; }
@@ -348,52 +361,14 @@ button, input, select, textarea { font-family: var(--font-sans); }
   <!-- ── 메리 인사이트 박스 ── -->
   <div class="mery-box">
     <div class="mery-character">
-      <svg viewBox="0 0 130 140" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto;">
-        <!-- 불꽃 같은 주황 꽃잎 아웃라인 (삐죽삐죽) -->
-        <g fill="#F09420">
-          <!-- 상단 중앙 큰 불꽃 -->
-          <path d="M65 2 L58 20 L72 20 Z"/>
-          <!-- 좌측 상단 -->
-          <path d="M30 18 L25 35 L42 28 Z"/>
-          <path d="M12 40 L10 55 L25 50 Z"/>
-          <!-- 좌측 -->
-          <path d="M8 60 L8 76 L22 68 Z"/>
-          <!-- 좌측 하단 -->
-          <path d="M12 84 L20 98 L28 85 Z"/>
-          <!-- 하단 -->
-          <path d="M38 96 L40 108 L50 98 Z"/>
-          <path d="M80 98 L90 108 L92 96 Z"/>
-          <!-- 우측 하단 -->
-          <path d="M102 85 L110 98 L118 84 Z"/>
-          <!-- 우측 -->
-          <path d="M108 68 L122 76 L122 60 Z"/>
-          <!-- 우측 상단 -->
-          <path d="M105 50 L120 55 L118 40 Z"/>
-          <path d="M88 28 L105 35 L100 18 Z"/>
-          <!-- 상단 우측 -->
-          <path d="M50 8 L55 22 L65 12 Z"/>
-          <path d="M65 12 L75 22 L80 8 Z"/>
-        </g>
-        <!-- 얼굴 원 (진한 주황) -->
-        <circle cx="65" cy="55" r="38" fill="#F09420"/>
-        <!-- 얼굴 (살색) -->
-        <circle cx="65" cy="58" r="30" fill="#FFE4C9"/>
-        <!-- 볼터치 -->
-        <circle cx="48" cy="65" r="4" fill="#F5A595" opacity="0.7"/>
-        <circle cx="82" cy="65" r="4" fill="#F5A595" opacity="0.7"/>
-        <!-- 눈 (동그랗고 큰 점) -->
-        <circle cx="55" cy="55" r="2.8" fill="#1F1F1F"/>
-        <circle cx="75" cy="55" r="2.8" fill="#1F1F1F"/>
-        <!-- 입 (작고 살짝 웃는) -->
-        <path d="M60 70 Q65 74 70 70" stroke="#1F1F1F" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-        <!-- 목 -->
-        <rect x="58" y="90" width="14" height="8" fill="#F09420"/>
-        <!-- 몸통 (빨간 셔츠) -->
-        <path d="M38 100 L38 135 L92 135 L92 100 Q92 95 87 95 L43 95 Q38 95 38 100 Z" fill="#E53935"/>
-        <!-- 흰색 하트 -->
-        <path d="M65 110 L58 104 Q54 100 58 96 Q61 94 65 98 Q69 94 72 96 Q76 100 72 104 Z" fill="#FFFFFF"/>
-        <!-- 빨간 셔츠 위 M 로고 (하트 안에) -->
-        <text x="65" y="107" text-anchor="middle" fill="#E53935" font-size="10" font-weight="800" font-family="sans-serif">M</text>
+      <svg viewBox="0 0 90 100" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto;">
+        <!-- 쉴드 형태 -->
+        <path d="M45 6 L10 22 L10 52 C10 74 25 90 45 96 C65 90 80 74 80 52 L80 22 Z" fill="#D32F2F"/>
+        <path d="M45 12 L16 26 L16 52 C16 70 28 84 45 90 C62 84 74 70 74 52 L74 26 Z" fill="#1A1A2E"/>
+        <!-- M 레터 -->
+        <text x="45" y="62" text-anchor="middle" fill="#FFFFFF" font-size="36" font-weight="800" font-family="'Pretendard Variable', sans-serif" letter-spacing="-1">M</text>
+        <!-- 하단 라인 악센트 -->
+        <path d="M28 72 L62 72" stroke="#D32F2F" stroke-width="2.5" stroke-linecap="round"/>
       </svg>
       <div class="mery-badge">EXPERT</div>
     </div>
@@ -403,7 +378,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
         <span>보험전문가 <strong>메리</strong>의 insight : 전문 통계에 의하면 암치료는 5년정도 받는대요 !</span>
       </div>
       <div class="mery-kicker">
-        <span class="red">{{ customer.name }}</span>님이 <span class="red">5년간</span> 보장받을 수 있는 <span class="red">암 치료비</span>는 최대
+        <span class="name">{{ customer.name }}</span>님이 <span class="red">5년간</span> 보장받을 수 있는 <span class="red">암 치료비</span>는 최대
       </div>
       <div class="mery-amount">
         {{ headline.five_year_min_display }} ~ {{ headline.five_year_max_display }}<span class="suffix">입니다.</span>
