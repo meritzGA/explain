@@ -44,7 +44,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
   margin: 24px auto;
   background: #FFFFFF;
   border-radius: 24px;
-  padding: 36px 48px 48px;
+  padding: 32px 44px 40px;
 }
 
 /* ── 메리 인사이트 박스 ── */
@@ -52,11 +52,11 @@ button, input, select, textarea { font-family: var(--font-sans); }
   background: #FAFAFA;
   border: 1px solid #EAEAEA;
   border-radius: 20px;
-  padding: 28px 36px;
+  padding: 24px 32px;
   display: flex;
   gap: 24px;
   align-items: flex-start;
-  margin-bottom: 56px;
+  margin-bottom: 36px;
 }
 .mery-character {
   flex-shrink: 0;
@@ -108,12 +108,13 @@ button, input, select, textarea { font-family: var(--font-sans); }
 }
 .mery-kicker .red { color: #E53935; font-weight: 700; }
 .mery-amount {
-  font-size: 48px;
+  font-size: 44px;
   font-weight: 800;
   color: #E53935;
   letter-spacing: -0.035em;
   line-height: 1.1;
-  margin: 10px 0 2px;
+  margin: 8px 0 2px;
+  font-feature-settings: 'tnum' on, 'lnum' on;
 }
 .mery-amount .suffix {
   font-size: 20px;
@@ -125,20 +126,20 @@ button, input, select, textarea { font-family: var(--font-sans); }
 .mery-disclaimer {
   font-size: 12px;
   color: #9A9A9A;
-  margin-top: 14px;
+  margin-top: 10px;
   line-height: 1.5;
   letter-spacing: -0.01em;
 }
 
 /* ── 섹션 타이틀 ── */
 .section-title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: #1F1F1F;
   padding-left: 10px;
   border-left: 4px solid #E53935;
   line-height: 1.2;
-  margin: 48px 0 36px;
+  margin: 36px 0 24px;
   letter-spacing: -0.02em;
 }
 
@@ -147,7 +148,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 32px 0 28px;
+  margin: 20px 0 18px;
   padding: 0 4px;
 }
 .total-bar-left {
@@ -176,7 +177,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
 .tx-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
+  gap: 16px;
 }
 @media (max-width: 1000px) { .tx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .tx-grid { grid-template-columns: 1fr; } }
@@ -184,8 +185,8 @@ button, input, select, textarea { font-family: var(--font-sans); }
 .tx-card {
   background: #FFFFFF;
   border: 1px solid #EEEEEE;
-  border-radius: 20px;
-  padding: 26px 26px 24px;
+  border-radius: 18px;
+  padding: 20px 20px 18px;
   display: flex;
   flex-direction: column;
 }
@@ -193,13 +194,13 @@ button, input, select, textarea { font-family: var(--font-sans); }
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 18px;
+  gap: 10px;
+  margin-bottom: 14px;
 }
 .tx-icon {
   flex-shrink: 0;
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
 }
 .tx-total {
   text-align: right;
@@ -211,7 +212,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
   font-weight: 600;
   letter-spacing: 0.12em;
   color: #9A9A9A;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 .tx-total-amount {
   font-size: 24px;
@@ -219,31 +220,32 @@ button, input, select, textarea { font-family: var(--font-sans); }
   color: #E53935;
   line-height: 1.15;
   letter-spacing: -0.03em;
-  white-space: pre-line;
+  white-space: nowrap;
+  font-feature-settings: 'tnum' on, 'lnum' on;
 }
 
 .tx-divider {
   border-top: 1px solid #EFEFEF;
-  margin: 4px 0 14px;
+  margin: 2px 0 10px;
 }
 .tx-title {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
   color: #1F1F1F;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   letter-spacing: -0.02em;
 }
 
-.tx-coverage-group { margin-bottom: 12px; }
+.tx-coverage-group { margin-bottom: 8px; }
 .tx-coverage-group:last-child { margin-bottom: 0; }
 
 .tx-coverage-line {
-  font-size: 13px;
+  font-size: 12px;
   color: #6A6A6A;
   font-weight: 500;
-  line-height: 1.45;
+  line-height: 1.4;
   padding-left: 4px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   letter-spacing: -0.015em;
 }
 .tx-coverage-line::before {
@@ -256,13 +258,13 @@ button, input, select, textarea { font-family: var(--font-sans); }
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  padding-left: 24px;
-  margin-bottom: 4px;
-  gap: 10px;
+  padding-left: 20px;
+  margin-bottom: 2px;
+  gap: 8px;
 }
 .tx-item:last-child { margin-bottom: 0; }
 .tx-item-label {
-  font-size: 12px;
+  font-size: 11px;
   color: #9A9A9A;
   line-height: 1.4;
   letter-spacing: -0.01em;
@@ -273,11 +275,12 @@ button, input, select, textarea { font-family: var(--font-sans); }
   margin-right: 2px;
 }
 .tx-item-val {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: #E53935;
   white-space: nowrap;
   letter-spacing: -0.02em;
+  font-feature-settings: 'tnum' on, 'lnum' on;
 }
 
 /* ── 하단 영역 ── */
@@ -285,7 +288,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  margin-top: 40px;
+  margin-top: 28px;
   gap: 20px;
 }
 .save-btn {
@@ -313,7 +316,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
   text-align: right;
   line-height: 1.5;
   letter-spacing: -0.01em;
-  margin-top: 32px;
+  margin-top: 24px;
 }
 
 /* ── 인쇄 최적화 ── */
@@ -472,6 +475,38 @@ button, input, select, textarea { font-family: var(--font-sans); }
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+/* ── 보장금액 한 줄 자동 맞춤 ── */
+(function() {
+  function fitAmounts() {
+    document.querySelectorAll('.tx-total-amount').forEach(function(el) {
+      /* 줄바꿈 → 물결표 한 줄로 합치기 */
+      var raw = el.textContent.replace(/\s+/g, '');
+      if (raw !== el.textContent.replace(/\s+/g, '')) el.textContent = raw;
+
+      var parent = el.closest('.tx-total');
+      if (!parent) return;
+      var maxW = parent.offsetWidth;
+      var fs = 24;
+      el.style.fontSize = fs + 'px';
+
+      while (el.scrollWidth > maxW && fs > 14) {
+        fs -= 0.5;
+        el.style.fontSize = fs + 'px';
+      }
+    });
+  }
+  /* DOM 로드 후 + 약간의 딜레이(웹폰트 로딩) */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(fitAmounts, 100); });
+  } else {
+    setTimeout(fitAmounts, 100);
+  }
+  /* 웹폰트 로드 완료 시 재계산 */
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function() { setTimeout(fitAmounts, 50); });
+  }
+})();
 <script>
 async function saveAsImage() {
   var btn = document.getElementById('save-img-btn');
