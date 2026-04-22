@@ -180,8 +180,6 @@ button, input, select, textarea { font-family: var(--font-sans); }
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
-@media (max-width: 1000px) { .tx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 640px) { .tx-grid { grid-template-columns: 1fr; } }
 
 .tx-card {
   background: #FFFFFF;
@@ -541,8 +539,13 @@ async function saveAsImage() {
   btn.textContent = '이미지 생성 중...';
   btn.disabled = true;
 
+  /* ★ 캡처용 너비 고정 (3열 그리드) */
+  var CAPTURE_W = 1200;
+  var origWidth = target.style.width;
+  target.style.width = CAPTURE_W + 'px';
+
   try {
-    /* ★ 캡처 직전 폰트 크기 재계산 */
+    /* 3열 레이아웃 기준으로 폰트 크기 재계산 */
     fitAmounts();
 
     var canvas = await html2canvas(target, {
@@ -550,7 +553,7 @@ async function saveAsImage() {
       backgroundColor: '#FFFFFF',
       useCORS: true,
       logging: false,
-      windowWidth: target.scrollWidth,
+      windowWidth: CAPTURE_W,
       windowHeight: target.scrollHeight
     });
 
@@ -571,6 +574,9 @@ async function saveAsImage() {
   } catch (err) {
     alert('이미지 저장 중 오류가 발생했습니다: ' + err.message);
   } finally {
+    /* 원래 너비 복원 + 화면용 폰트 크기 재계산 */
+    target.style.width = origWidth;
+    fitAmounts();
     btn.innerHTML = origHTML;
     btn.disabled = false;
   }
