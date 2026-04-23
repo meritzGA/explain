@@ -4,6 +4,9 @@
   "report_title_prefix": "2대담보 치료비",
   "report_subtitle": "가입제안서 기반 2대담보 치료비 간편 분석 리포트",
 
+  "_comment_deduction": "2대담보는 '1년 미경과 감액' 개념이 담보별로 다르고 min/max 분해가 의미 없어서, 단일 금액으로 표기. 감액 안내문구도 숨김.",
+  "has_deduction": false,
+
   "product_matchers": [
     {
       "id": "integrated_simple",
