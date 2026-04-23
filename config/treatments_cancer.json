@@ -616,6 +616,12 @@
               { "label": "(연1회) (비급여) 암(유사암제외) 항암방사선치료", "amount": 1000 },
               { "label": "(연1회) (비급여) 항암양성자방사선치료", "amount": 3000 }
             ]
+          },
+          {
+            "match_coverage": "항암양성자방사선치료비",
+            "items": [
+              { "label": "(연1회) 항암양성자방사선치료비", "follow_coverage_amount": true }
+            ]
           }
         ]
       },
@@ -657,6 +663,18 @@
               { "label": "(매회) (비급여) 암(유사암제외) 수술", "amount": 1000 },
               { "label": "(연1회) (비급여) 암(특정암제외) 다빈치로봇수술", "amount": 1000 }
             ]
+          },
+          {
+            "match_coverage": "다빈치로봇\\s*암수술비\\(암\\(특정암제외\\)\\)",
+            "items": [
+              { "label": "(연1회) 다빈치로봇 암수술비 (특정암 제외)", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "다빈치로봇\\s*암수술비\\(특정암\\)",
+            "items": [
+              { "label": "(연1회) 다빈치로봇 암수술비 (특정암)", "follow_coverage_amount": true }
+            ]
           }
         ]
       },
@@ -676,6 +694,12 @@
             "match_coverage": "^갱신형 암 통합치료비Ⅱ",
             "items": [
               { "label": "(연1회) (비급여) 암(유사암제외) 항암약물치료", "amount": 1000 }
+            ]
+          },
+          {
+            "match_coverage": "항암방사선약물치료비",
+            "items": [
+              { "label": "(연1회) 항암약물치료비", "follow_coverage_amount": true }
             ]
           }
         ]
@@ -697,6 +721,12 @@
             "items": [
               { "label": "(연1회) (비급여) 암(유사암제외) 항암방사선치료", "amount": 1000 }
             ]
+          },
+          {
+            "match_coverage": "항암방사선약물치료비",
+            "items": [
+              { "label": "(연1회) 항암방사선치료비", "follow_coverage_amount": true }
+            ]
           }
         ]
       },
@@ -716,6 +746,26 @@
             "match_coverage": "^갱신형 암 통합치료비Ⅱ",
             "items": [
               { "label": "(연1회) (비급여) 암(유사암제외) 항암방사선치료", "amount": 1000 }
+            ]
+          },
+          {
+            "match_coverage": "항암세기조절방사선치료비",
+            "items": [
+              { "label": "(연1회) 항암세기조절방사선치료비", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "carbon_ion",
+        "label": "중입자방사선치료비",
+        "icon": "atom",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "항암중입자방사선치료비",
+            "items": [
+              { "label": "(최초1회) 항암중입자방사선치료비", "follow_coverage_amount": true }
             ]
           }
         ]
