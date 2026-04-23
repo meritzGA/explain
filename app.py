@@ -627,8 +627,10 @@ button, input, textarea, select {
   margin-top: 2px;
 }
 
-/* "파일 취소 하기" 버튼 스타일 (st.button으로 렌더됨) */
-[data-testid="stButton"] button[kind="secondary"] {
+/* "파일 취소 하기" 버튼 스타일 (st.button으로 렌더됨, key="cancel_upload"로 타겟팅) */
+.st-key-cancel_upload [data-testid="stButton"] button,
+.st-key-cancel_upload button[kind="secondary"],
+.st-key-cancel_upload button {
   background: #F5F5F5 !important;
   color: #6A6A6A !important;
   border: none !important;
@@ -641,9 +643,17 @@ button, input, textarea, select {
   height: 74px !important;
   white-space: nowrap !important;
 }
-[data-testid="stButton"] button[kind="secondary"]:hover {
+.st-key-cancel_upload [data-testid="stButton"] button:hover,
+.st-key-cancel_upload button[kind="secondary"]:hover,
+.st-key-cancel_upload button:hover {
   background: #E8E8E8 !important;
   color: #1F1F1F !important;
+}
+.st-key-cancel_upload p {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: inherit !important;
+  margin: 0 !important;
 }
 
 /* ── (레거시) 탭 라벨 크게 — 현재 Pill 방식으로 대체됨. 다른 곳에서 st.tabs 사용 시 대비용으로 남겨둠 ── */
@@ -748,23 +758,25 @@ button, input, textarea, select {
             results[analyzer["id"]] = build_analyzer_result(pdf_bytes, analyzer["id"])
 
     # ─────────────────────────────────────────────────────────
-    # 큰 Pill Badge 방식 분석기 선택 (탭 대체)
+    # 큰 Pill Badge 방식 분석기 선택
     # ─────────────────────────────────────────────────────────
-    # 각 분석기마다 pill 색상 정의 (id 기준)
+    # st.button(key="foo")로 생성되는 래퍼 div에는 class="st-key-foo"가 붙는다.
+    # 이 key-class를 선택자로 삼아 각 버튼을 개별 스타일링.
+
     pill_styles = {
         "cancer": {
-            "bg":       "#F4B088",   # 살구 배경
+            "bg":       "#F4B088",
             "bg_hover": "#EFA071",
-            "text":     "#C44D25",   # 진한 오렌지 텍스트
+            "text":     "#C44D25",
         },
         "two_major": {
-            "bg":       "#8DBEDE",   # 연하늘 배경
+            "bg":       "#8DBEDE",
             "bg_hover": "#76AED2",
-            "text":     "#0C447C",   # 진한 네이비 텍스트
+            "text":     "#0C447C",
         },
     }
 
-    # 현재 활성 분석기 결정
+    # 현재 활성 분석기 (session_state로 관리)
     if "active_analyzer" not in st.session_state:
         st.session_state.active_analyzer = registry[0]["id"]
     active_id = st.session_state.active_analyzer
@@ -772,69 +784,77 @@ button, input, textarea, select {
         active_id = registry[0]["id"]
         st.session_state.active_analyzer = active_id
 
-    # Pill 스타일 CSS 주입 — 컬럼 위치(nth-child) 기반 타겟팅.
-    # 버튼 바로 앞 row에 컨테이너 marker를 두어, marker 이후 등장하는 column row들만
-    # pill 스타일이 적용되도록 범위를 제한한다. Streamlit에서 stHorizontalBlock이 columns
-    # 컨테이너이므로 `.pill-row-scope + div[data-testid="stHorizontalBlock"]`로 다음 row를 잡는다.
+    # Pill CSS — key-class 기반 타겟팅
     pill_css_parts = []
-    for idx, analyzer in enumerate(registry):
+    for analyzer in registry:
         aid = analyzer["id"]
         sty = pill_styles.get(aid, {"bg": "#DDDDDD", "bg_hover": "#CCCCCC", "text": "#333333"})
         is_active = (aid == active_id)
-        nth = idx + 1  # 1-based
-        # `~` (일반 형제) 사용: marker의 모든 후속 형제 중 horizontal block 안의 nth column
-        # `+` 는 바로 다음 형제만 잡지만, Streamlit이 spinner/status 등 중간 요소를 끼워넣는
-        # 경우가 있어 `~`가 더 안전.
-        # :has() 선택자로 pill-row-scope 마커 이후의 첫 stHorizontalBlock의 nth 컬럼 버튼 타겟팅.
-        # :has()는 Chrome 105+ (2022.9), Safari 15.4+ (2022.3), Firefox 121+ (2023.12) 지원.
-        sel_btn_base = (
-            f'.stMarkdown:has(.pill-row-scope) ~ div[data-testid="stHorizontalBlock"] '
-            f'> div[data-testid="column"]:nth-child({nth}) '
-            f'.stButton > button'
-        )
+        key = f"pill_btn_{aid}"
+        # st.button(key=X)의 래퍼 div는 class="st-key-X"를 받는다.
+        # 그 내부의 button을 타겟팅. secondary 전역 스타일보다 더 구체적(specific)이므로 덮어씀.
+        sel = f'.st-key-{key} [data-testid="stButton"] button, .st-key-{key} button[kind="secondary"], .st-key-{key} button'
         pill_css_parts.append(f"""
-/* Pill #{nth} — {aid} */
-{sel_btn_base} {{
+/* Pill — {aid} */
+{sel} {{
   background: {sty['bg']} !important;
   color: {sty['text']} !important;
   border: none !important;
   border-radius: 22px !important;
-  font-size: 24px !important;
+  font-size: 26px !important;
   font-weight: 900 !important;
   letter-spacing: -0.8px !important;
   padding: 22px 16px !important;
   width: 100% !important;
   min-height: 96px !important;
+  height: auto !important;
+  white-space: normal !important;
   box-shadow: 0 4px 14px rgba(0,0,0,0.08) !important;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease, background 0.15s ease !important;
   opacity: {1.0 if is_active else 0.55} !important;
   transform: {"scale(1.0)" if is_active else "scale(0.97)"} !important;
 }}
-{sel_btn_base}:hover {{
+.st-key-{key} [data-testid="stButton"] button:hover,
+.st-key-{key} button[kind="secondary"]:hover,
+.st-key-{key} button:hover {{
   background: {sty['bg_hover']} !important;
   color: {sty['text']} !important;
   opacity: 1.0 !important;
   transform: scale(1.0) !important;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.12) !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.14) !important;
 }}
-{sel_btn_base}:active,
-{sel_btn_base}:focus {{
+.st-key-{key} [data-testid="stButton"] button:active,
+.st-key-{key} [data-testid="stButton"] button:focus,
+.st-key-{key} button[kind="secondary"]:active,
+.st-key-{key} button[kind="secondary"]:focus,
+.st-key-{key} button:active,
+.st-key-{key} button:focus {{
   background: {sty['bg']} !important;
   color: {sty['text']} !important;
   box-shadow: 0 4px 14px rgba(0,0,0,0.08) !important;
   outline: none !important;
 }}
+/* 버튼 안의 markdown p 태그도 색상 유지 */
+.st-key-{key} p {{
+  color: {sty['text']} !important;
+  font-size: 26px !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.8px !important;
+  margin: 0 !important;
+}}
 """)
     pill_css_parts.append("""
-.pill-row-spacer { margin-top: 18px; margin-bottom: 8px; }
-.pill-row-scope { display: none; }
+.pill-spacer { margin-top: 18px; margin-bottom: 8px; }
+/* 모바일 대응 — 버튼 내부 텍스트 크기 축소 */
+@media (max-width: 640px) {
+  [class*="st-key-pill_btn_"] button { font-size: 18px !important; min-height: 72px !important; }
+  [class*="st-key-pill_btn_"] p { font-size: 18px !important; }
+}
 """)
     st.markdown(f"<style>{''.join(pill_css_parts)}</style>", unsafe_allow_html=True)
 
     # Pill 버튼 렌더링
-    st.markdown('<div class="pill-row-spacer"></div>', unsafe_allow_html=True)
-    # scope marker: 이후 첫 stHorizontalBlock(아래 st.columns)을 CSS가 타겟팅
-    st.markdown('<div class="pill-row-scope"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="pill-spacer"></div>', unsafe_allow_html=True)
     cols = st.columns(len(registry))
     for col, analyzer in zip(cols, registry):
         with col:
@@ -843,7 +863,6 @@ button, input, textarea, select {
                 st.rerun()
 
     # 선택된 분석기만 렌더링
-    active_analyzer = next(a for a in registry if a["id"] == active_id)
     _render_analyzer_tab(results[active_id], pdf_bytes, file_name)
 
 
