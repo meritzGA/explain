@@ -500,30 +500,31 @@ button, input, textarea, select {
   margin: 0 0 32px 0;
 }
 
-/* ── 파일 업로더 프리미엄 스타일 ── */
+/* ── 파일 업로더 스타일 ──
+   주의: dropzone 내부(Streamlit 기본 문구·버튼)는 건드리지 않음.
+   내부 padding/레이아웃을 override하면 문구가 버튼과 겹침. */
 [data-testid="stFileUploader"] {
   background: #FFFFFF;
-  border: 1.5px dashed #CCCCCC;
   border-radius: 18px;
-  padding: 8px;
   transition: all 0.2s ease;
 }
-[data-testid="stFileUploader"]:hover {
-  border-color: #E53935;
-  box-shadow: 0 4px 16px rgba(229, 57, 53, 0.08);
-}
 [data-testid="stFileUploaderDropzone"] {
-  background: transparent !important;
-  border: none !important;
-  padding: 28px 20px !important;
+  border: 1.5px dashed #CCCCCC !important;
+  border-radius: 16px !important;
+  background: #FAFAFA !important;
+  transition: all 0.2s ease;
 }
+[data-testid="stFileUploaderDropzone"]:hover {
+  border-color: #E53935 !important;
+  background: #FFFFFF !important;
+}
+/* 버튼 색상만 살짝 프리미엄하게 — 패딩/크기는 기본 유지 */
 [data-testid="stFileUploaderDropzone"] button {
   background: #1F1F1F !important;
   color: #FFFFFF !important;
   border: none !important;
-  border-radius: 10px !important;
+  border-radius: 8px !important;
   font-weight: 600 !important;
-  padding: 10px 22px !important;
 }
 [data-testid="stFileUploaderDropzone"] button:hover {
   background: #E53935 !important;
