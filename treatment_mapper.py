@@ -144,7 +144,7 @@ def build_treatment_cards(
                         label=item_def["label"],
                         min_amount=amt,
                         max_amount=amt,
-                        display=f"{amt:,}만",
+                        display=item_def.get("display", f"{amt:,}만"),
                     )
 
                 if exclusive_group:
@@ -157,8 +157,29 @@ def build_treatment_cards(
             best = max(candidates, key=lambda pair: pair[0].max_amount)
             card.items.append(best[0])
 
-        card.subtotal_min = sum(i.min_amount for i in card.items)
-        card.subtotal_max = sum(i.max_amount for i in card.items)
+        # Subtotal 계산 — 기본은 items 단순 합.
+        # subtotal_mode: "coverage_cap"이면 담보 가입금액을 상한(cap)으로 사용.
+        # 예: 특정순환계질환 통합치료비 — 세부 치료 항목을 나열하지만
+        # 연간 총 지급액은 담보 가입금액을 넘지 않음(예: 5,000만원 한도).
+        subtotal_mode = card_def.get("subtotal_mode", "sum")
+        if subtotal_mode == "coverage_cap":
+            # 이 카드에 매칭된 담보 중 가장 큰 가입금액을 cap으로 사용
+            caps = [
+                cov.amount // 10000
+                for contrib in card_def.get("contributions", [])
+                for cov in coverages
+                if cov.amount and re.search(contrib["match_coverage"], cov.name)
+            ]
+            if caps:
+                cap_man = max(caps)
+                card.subtotal_min = cap_man
+                card.subtotal_max = cap_man
+            else:
+                card.subtotal_min = sum(i.min_amount for i in card.items)
+                card.subtotal_max = sum(i.max_amount for i in card.items)
+        else:
+            card.subtotal_min = sum(i.min_amount for i in card.items)
+            card.subtotal_max = sum(i.max_amount for i in card.items)
 
         # 담보가 하나도 안 붙으면 카드 생략
         if card.items:

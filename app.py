@@ -574,71 +574,72 @@ button, input, textarea, select {
 }
 
 /* ─────────────────────────────────────────────────────────
-   업로드 완료 상태 — 박스 축소 + 파일 정보 카드 스타일
+   업로드 완료 상태 — 커스텀 파일 카드 + 취소 버튼
    ─────────────────────────────────────────────────────────
-   파일이 업로드되면 [data-testid="stFileUploader"] 안에
-   [data-testid="stFileUploaderFile"] 요소가 나타남.
-   CSS :has()로 이 상태를 감지해 스타일 전환. */
+   Streamlit의 file_uploader는 업로드 후 session_state로 숨겨지고,
+   대신 아래 HTML 카드 + st.button으로 구성됨. */
 
-/* 업로드 완료 시 dropzone을 완전히 숨김 */
-[data-testid="stFileUploader"]:has([data-testid="stFileUploaderFile"]) [data-testid="stFileUploaderDropzone"] {
-  display: none !important;
+.file-loaded-card {
+  background: #FFFFFF;
+  border: 1px solid #F0F0F0;
+  border-radius: 20px;
+  padding: 16px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
-
-/* 업로드된 파일 카드 — 흰 배경, 라운드, 좌우 배치 */
-[data-testid="stFileUploaderFile"] {
-  background: #FFFFFF !important;
-  border: 1px solid #F0F0F0 !important;
-  border-radius: 20px !important;
-  padding: 14px 22px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 14px !important;
+.file-loaded-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #FFEAEA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
-
-/* 파일명 */
-[data-testid="stFileUploaderFileName"] {
-  font-size: 15px !important;
-  font-weight: 600 !important;
-  color: #1F1F1F !important;
+.file-loaded-icon svg {
+  width: 22px;
+  height: 22px;
+}
+.file-loaded-info {
+  flex: 1;
+  min-width: 0;
+}
+.file-loaded-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1F1F1F;
   letter-spacing: -0.3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.file-loaded-size {
+  font-size: 12px;
+  color: #9A9A9A;
+  font-weight: 500;
+  margin-top: 2px;
 }
 
-/* 파일 크기 라벨 */
-[data-testid="stFileUploaderFile"] small {
-  font-size: 12px !important;
-  color: #9A9A9A !important;
-  font-weight: 500 !important;
-}
-
-/* 파일 삭제 버튼을 pill 버튼으로 + 텍스트 치환 */
-[data-testid="stFileUploaderDeleteBtn"] button {
+/* "파일 취소 하기" 버튼 스타일 (st.button으로 렌더됨) */
+[data-testid="stButton"] button[kind="secondary"] {
   background: #F5F5F5 !important;
   color: #6A6A6A !important;
   border: none !important;
   border-radius: 999px !important;
-  padding: 8px 18px !important;
+  padding: 12px 14px !important;
   font-size: 13px !important;
   font-weight: 600 !important;
   letter-spacing: -0.2px;
   transition: all 0.15s ease;
-  min-width: 100px !important;
+  height: 74px !important;
+  white-space: nowrap !important;
 }
-[data-testid="stFileUploaderDeleteBtn"] button:hover {
+[data-testid="stButton"] button[kind="secondary"]:hover {
   background: #E8E8E8 !important;
   color: #1F1F1F !important;
-}
-
-/* 삭제 버튼의 기본 X 아이콘 숨기고 "파일 취소 하기" 텍스트 표시 */
-[data-testid="stFileUploaderDeleteBtn"] button svg,
-[data-testid="stFileUploaderDeleteBtn"] svg {
-  display: none !important;
-}
-[data-testid="stFileUploaderDeleteBtn"] button::after {
-  content: "파일 취소 하기";
-  display: inline-block;
-  white-space: nowrap;
 }
 
 /* ── 탭 라벨 크게 ── */
@@ -678,23 +679,63 @@ button, input, textarea, select {
         unsafe_allow_html=True,
     )
 
-    uploaded = st.file_uploader(
-        "가입제안서 PDF를 업로드하세요",
-        type="pdf",
-        label_visibility="collapsed",
-    )
+    # ── 파일 업로드 상태 관리 ──
+    # session_state에 PDF bytes와 파일명을 저장. 업로드 완료 상태에선 uploader를 숨김.
+    if "uploaded_pdf_bytes" not in st.session_state:
+        st.session_state.uploaded_pdf_bytes = None
+        st.session_state.uploaded_pdf_name = None
 
-    # 업로더 하단 안내 문구 — 업로드 전에만 표시
-    if not uploaded:
+    # 업로드 전 상태 — file_uploader 렌더
+    if st.session_state.uploaded_pdf_bytes is None:
+        uploaded = st.file_uploader(
+            "가입제안서 PDF를 업로드하세요",
+            type="pdf",
+            label_visibility="collapsed",
+            key="pdf_uploader",
+        )
+        # 업로더 하단 안내 문구
         st.markdown(
             '<div class="uploader-helper">'
             '* 가입제안서안에 있는 담보 가입금액을 꼭 계산해보고 참고용으로만 사용하세요'
             '</div>',
             unsafe_allow_html=True,
         )
-        return  # 업로드 대기 상태
+        if uploaded is None:
+            return  # 업로드 대기
+        # 업로드 완료 → session_state에 저장 후 rerun
+        st.session_state.uploaded_pdf_bytes = uploaded.read()
+        st.session_state.uploaded_pdf_name = uploaded.name
+        st.rerun()
 
-    pdf_bytes = uploaded.read()
+    pdf_bytes = st.session_state.uploaded_pdf_bytes
+    file_name = st.session_state.uploaded_pdf_name
+
+    # ── 업로드 완료 상태 — 커스텀 파일 카드 렌더 ──
+    size_kb = len(pdf_bytes) / 1024
+    size_str = f"{size_kb:,.1f} KB" if size_kb < 1024 else f"{size_kb/1024:,.2f} MB"
+
+    file_card_col, btn_col = st.columns([10, 1.5], gap="small")
+    with file_card_col:
+        st.markdown(
+            f'''<div class="file-loaded-card">
+                <div class="file-loaded-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#E53935" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                </div>
+                <div class="file-loaded-info">
+                    <div class="file-loaded-name">{file_name}</div>
+                    <div class="file-loaded-size">{size_str}</div>
+                </div>
+            </div>''',
+            unsafe_allow_html=True,
+        )
+    with btn_col:
+        if st.button("파일 취소 하기", key="cancel_upload", use_container_width=True):
+            st.session_state.uploaded_pdf_bytes = None
+            st.session_state.uploaded_pdf_name = None
+            st.rerun()
 
     # 각 분석기를 순차 처리. parse_pdf는 첫 호출에서만 실제 파싱, 이후는 캐시 히트
     results: dict[str, dict] = {}
@@ -708,7 +749,7 @@ button, input, textarea, select {
 
     for tab, analyzer in zip(tabs, registry):
         with tab:
-            _render_analyzer_tab(results[analyzer["id"]], pdf_bytes, uploaded.name)
+            _render_analyzer_tab(results[analyzer["id"]], pdf_bytes, file_name)
 
 
 if __name__ == "__main__":
