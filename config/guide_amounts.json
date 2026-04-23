@@ -13,6 +13,7 @@
   "bitonchi_premium": {
     "label": "비통치 고급형",
     "product_name": "암 통합치료비Ⅱ(비급여(전액본인부담 포함))",
+    "_note": "약관 특별약관 101번 기준. 연1회한 1년 경과시점 이후 지급액으로 설정.",
     "match_patterns": [
       "암\\s*통합치료비\\s*Ⅱ.*비급여.*전액본인부담",
       "암\\s*통합치료비2.*비급여.*전액본인부담",
@@ -28,11 +29,11 @@
         "radiation_skin_thyroid":          200,
         "chemo_cancer":                   1000,
         "chemo_skin_thyroid":              200,
-        "davinci_cancer":                 2000,
-        "davinci_specific_cancer":        1200,
-        "targeted":                       4000,
-        "immune":                         7000,
-        "proton":                         4000
+        "davinci_cancer":                 1000,
+        "davinci_specific_cancer":         200,
+        "targeted":                       3000,
+        "immune":                         3000,
+        "proton":                         3000
       },
       "7000": {
         "surgery_cancer_per_time":         750,
@@ -41,11 +42,11 @@
         "radiation_skin_thyroid":          150,
         "chemo_cancer":                    750,
         "chemo_skin_thyroid":              150,
-        "davinci_cancer":                 1500,
-        "davinci_specific_cancer":         900,
-        "targeted":                       2750,
-        "immune":                         4750,
-        "proton":                         2750
+        "davinci_cancer":                  750,
+        "davinci_specific_cancer":         150,
+        "targeted":                       2000,
+        "immune":                         2000,
+        "proton":                         2000
       },
       "4000": {
         "surgery_cancer_per_time":         500,
@@ -54,11 +55,11 @@
         "radiation_skin_thyroid":          100,
         "chemo_cancer":                    500,
         "chemo_skin_thyroid":              100,
-        "davinci_cancer":                 1000,
-        "davinci_specific_cancer":         600,
-        "targeted":                       1500,
-        "immune":                         2500,
-        "proton":                         1500
+        "davinci_cancer":                  500,
+        "davinci_specific_cancer":         100,
+        "targeted":                       1000,
+        "immune":                         1000,
+        "proton":                         1000
       }
     }
   },
@@ -112,6 +113,7 @@
   "amtonchi_basic": {
     "label": "암통치 기본형",
     "product_name": "암 통합치료비(기본형)",
+    "_note": "약관 특별약관 98번 기준(암중점). 감액 구조 없음 — 단일 지급액.",
     "match_patterns": [
       "암\\s*통합치료비\\(기본형\\)",
       "통합치료비\\s*\\(기본형"
@@ -136,11 +138,11 @@
         "chemo_skin_thyroid":              200,
         "imrt":                           1000,
         "pain_relief":                      50,
-        "davinci_cancer":                 2000,
-        "davinci_specific_cancer":        1200,
-        "targeted":                       4000,
-        "immune":                         7000,
-        "proton":                         4000,
+        "davinci_cancer":                 1000,
+        "davinci_specific_cancer":         200,
+        "targeted":                       3000,
+        "immune":                         3000,
+        "proton":                         3000,
         "rehab_in_per_day":                  2,
         "rehab_out_per_day":                 2
       },
@@ -161,11 +163,11 @@
         "chemo_skin_thyroid":              150,
         "imrt":                            750,
         "pain_relief":                      40,
-        "davinci_cancer":                 1500,
-        "davinci_specific_cancer":         900,
-        "targeted":                       2750,
-        "immune":                         4750,
-        "proton":                         2750,
+        "davinci_cancer":                  750,
+        "davinci_specific_cancer":         150,
+        "targeted":                       2000,
+        "immune":                         2000,
+        "proton":                         2000,
         "rehab_in_per_day":                  2,
         "rehab_out_per_day":                 2
       },
@@ -186,11 +188,11 @@
         "chemo_skin_thyroid":              100,
         "imrt":                            500,
         "pain_relief":                      30,
-        "davinci_cancer":                 1000,
-        "davinci_specific_cancer":         600,
-        "targeted":                       1500,
-        "immune":                         2500,
-        "proton":                         1500,
+        "davinci_cancer":                  500,
+        "davinci_specific_cancer":         100,
+        "targeted":                       1000,
+        "immune":                         1000,
+        "proton":                         1000,
         "rehab_in_per_day":                  2,
         "rehab_out_per_day":                 2
       }
@@ -200,6 +202,7 @@
   "amtonchi_economy": {
     "label": "암통치 실속형",
     "product_name": "암 통합치료비(실속형)",
+    "_note": "약관 특별약관 99번 기준(암중점). 감액 구조 없음 — 단일 지급액. 다빈치 항목 없음.",
     "match_patterns": [
       "암\\s*통합치료비\\(실속형\\)",
       "통합치료비\\s*\\(실속형"
@@ -214,9 +217,9 @@
         "radiation_skin_thyroid":          200,
         "chemo_cancer":                   1000,
         "chemo_skin_thyroid":              200,
-        "targeted":                       2000,
-        "immune":                         3000,
-        "proton":                         2000
+        "targeted":                       1000,
+        "immune":                         1000,
+        "proton":                         1000
       },
       "5000": {
         "surgery_cancer_per_time":         750,
@@ -225,9 +228,9 @@
         "radiation_skin_thyroid":          150,
         "chemo_cancer":                    750,
         "chemo_skin_thyroid":              150,
-        "targeted":                       1500,
-        "immune":                         2250,
-        "proton":                         1500
+        "targeted":                        750,
+        "immune":                          750,
+        "proton":                          750
       },
       "3000": {
         "surgery_cancer_per_time":         500,
@@ -236,9 +239,9 @@
         "radiation_skin_thyroid":          100,
         "chemo_cancer":                    500,
         "chemo_skin_thyroid":              100,
-        "targeted":                       1000,
-        "immune":                         1500,
-        "proton":                         1000
+        "targeted":                        500,
+        "immune":                          500,
+        "proton":                          500
       },
       "1000": {
         "surgery_cancer_per_time":         250,
@@ -247,9 +250,9 @@
         "radiation_skin_thyroid":           50,
         "chemo_cancer":                    250,
         "chemo_skin_thyroid":               50,
-        "targeted":                        500,
-        "immune":                          750,
-        "proton":                          500
+        "targeted":                        250,
+        "immune":                          250,
+        "proton":                          250
       }
     }
   },
@@ -257,6 +260,7 @@
   "suntonchi": {
     "label": "순통치 (특정순환계질환 통합치료비)",
     "product_name": "특정순환계질환 통합치료비",
+    "_note": "약관 특별약관 74번 기준. 감액 구조 있음(1년 전 50% / 1년 후 100%) — 현재 JSON은 1년 후 값.",
     "match_patterns": [
       "특정순환계질환\\s*통합치료비",
       "특정\\s*순환계\\s*통합치료비"
@@ -283,9 +287,9 @@
         "exam_mri":                         5,
         "exam_pet":                         5,
         "exam_ct":                         10,
-        "surgery_per_time":              2000,
-        "icu":                           2000,
-        "thrombolysis":                  2000,
+        "surgery_per_time":              1000,
+        "icu":                           1000,
+        "thrombolysis":                  1000,
         "crrt":                           500,
         "ventilator":                     200,
         "hypothermia":                    100,
@@ -297,20 +301,6 @@
         "exam_mri":                         5,
         "exam_pet":                         5,
         "exam_ct":                         10,
-        "surgery_per_time":              1000,
-        "icu":                           1000,
-        "thrombolysis":                  1000,
-        "crrt":                           500,
-        "ventilator":                     200,
-        "hypothermia":                    100,
-        "ecmo":                          2000,
-        "rehab_in_per_day":                 2,
-        "rehab_out_per_day":                2
-      },
-      "3000": {
-        "exam_mri":                         5,
-        "exam_pet":                         5,
-        "exam_ct":                         10,
         "surgery_per_time":               700,
         "icu":                            700,
         "thrombolysis":                   700,
@@ -318,6 +308,20 @@
         "ventilator":                     100,
         "hypothermia":                     50,
         "ecmo":                          1000,
+        "rehab_in_per_day":                 2,
+        "rehab_out_per_day":                2
+      },
+      "3000": {
+        "exam_mri":                         5,
+        "exam_pet":                         5,
+        "exam_ct":                         10,
+        "surgery_per_time":               400,
+        "icu":                            400,
+        "thrombolysis":                   400,
+        "crrt":                           200,
+        "ventilator":                     100,
+        "hypothermia":                     50,
+        "ecmo":                           500,
         "rehab_in_per_day":                 2,
         "rehab_out_per_day":                2
       },
