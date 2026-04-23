@@ -78,8 +78,16 @@ def build_treatment_cards(
     product_type: str,
     treatments_config: dict,
 ) -> list[TreatmentCard]:
-    """해당 상품 타입의 프리셋을 기반으로 치료 카드들을 구성."""
-    cards_config = treatments_config.get("cancer_treatment_cards", {}).get(product_type, [])
+    """해당 상품 타입의 프리셋을 기반으로 치료 카드들을 구성.
+
+    특정 product_type에 카드 프리셋이 없으면, 2대담보처럼 상품 무관하게 동일한
+    카드를 적용하는 경우를 위해 `_alias_applied_in_code: true`인 설정에 한해
+    `generic_2major` 프리셋으로 fallback한다.
+    """
+    all_presets = treatments_config.get("cancer_treatment_cards", {})
+    cards_config = all_presets.get(product_type, [])
+    if not cards_config and treatments_config.get("_alias_applied_in_code"):
+        cards_config = all_presets.get("generic_2major", [])
     if not cards_config:
         return []
 
@@ -127,7 +135,7 @@ def build_treatment_cards(
                         label=item_def["label"],
                         min_amount=item_def["min"],
                         max_amount=item_def["max"],
-                        display=f"{item_def['max']:,}만({item_def['min']:,}만)",
+                        display=item_def.get("display", f"{item_def['min']:,}만({item_def['max']:,}만)"),
                     )
                 else:
                     amt = item_def.get("amount", 0)

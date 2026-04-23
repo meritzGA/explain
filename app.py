@@ -58,14 +58,19 @@ def _find_asset_dir(name: str) -> Path:
     )
 
 @st.cache_resource
-def load_events_config() -> dict:
-    with open(_find_asset_dir("config") / "events.json", encoding="utf-8") as f:
-        return json.load(f)
+def load_analyzer_registry() -> list[dict]:
+    """analyzers.json에서 탭으로 표시할 분석기 목록을 로드."""
+    with open(_find_asset_dir("config") / "analyzers.json", encoding="utf-8") as f:
+        data = json.load(f)
+    return data["analyzers"]
+
 
 @st.cache_resource
-def load_treatments_config() -> dict:
-    with open(_find_asset_dir("config") / "treatments.json", encoding="utf-8") as f:
+def load_config_file(filename: str) -> dict:
+    """config/ 아래의 JSON 파일을 파일명으로 로드. 파일명을 캐시 키로 사용."""
+    with open(_find_asset_dir("config") / filename, encoding="utf-8") as f:
         return json.load(f)
+
 
 @st.cache_resource
 def load_jinja_env() -> Environment:
@@ -293,25 +298,52 @@ def _build_event(event_def: dict, matched: list[Coverage]) -> dict:
 
 
 # ─────────────────────────────────────────────────────────────
-# 캐시된 전체 처리 파이프라인
+# 캐시된 처리 파이프라인 — 2단계
+#   1) parse_pdf: PDF당 1회만 (담보 추출은 비싸므로 분석기 간 공유)
+#   2) build_analyzer_result: 분석기별로 매핑만 수행
 # ─────────────────────────────────────────────────────────────
 
 @st.cache_data(show_spinner=False)
-def process_pdf(pdf_bytes: bytes) -> dict:
-    """파일 해시를 키로 캐싱. 같은 PDF 두 번째 업로드시 즉시 반환."""
+def parse_pdf(pdf_bytes: bytes) -> dict:
+    """PDF → 고객·계약·담보 데이터. 분석기 전체가 공유."""
     data = extract(pdf_bytes)
-    events_config = load_events_config()
-    treatments_config = load_treatments_config()
+    return {
+        "customer": asdict(data.customer),
+        "policy": asdict(data.policy),
+        "coverages": [asdict(c) for c in data.coverages],
+    }
 
-    mapped_events, extras = map_to_events(data.coverages, events_config)
+
+@st.cache_data(show_spinner=False)
+def build_analyzer_result(pdf_bytes: bytes, analyzer_id: str) -> dict:
+    """분석기 ID별 매핑 결과. pdf_bytes + analyzer_id가 캐시 키."""
+    # 레지스트리에서 이 분석기 설정 찾기
+    registry = load_analyzer_registry()
+    analyzer = next((a for a in registry if a["id"] == analyzer_id), None)
+    if not analyzer:
+        raise ValueError(f"Unknown analyzer: {analyzer_id}")
+
+    events_config = load_config_file(analyzer["events_config"])
+    treatments_config = load_config_file(analyzer["treatments_config"])
+
+    # PDF 파싱 결과 재사용
+    parsed = parse_pdf(pdf_bytes)
+    coverages = [Coverage(**c) for c in parsed["coverages"]]
+
+    # 이벤트 매핑 (참고용 extras 정리)
+    mapped_events, extras = map_to_events(coverages, events_config)
 
     # 치료 방식별 서브카드 구성
-    combined_product_str = f"{data.policy.product_name_short} {data.policy.product_name_full}"
+    policy = parsed["policy"]
+    combined_product_str = f"{policy.get('product_name_short', '')} {policy.get('product_name_full', '')}"
     product_type = pick_product_type(combined_product_str, treatments_config)
-    treatment_cards_raw = build_treatment_cards(data.coverages, product_type, treatments_config) if product_type else []
-    headline = build_headline(data.customer.name, treatment_cards_raw, treatments_config) if treatment_cards_raw else None
+    treatment_cards_raw = build_treatment_cards(coverages, product_type, treatments_config) if product_type else []
+    # 2대담보처럼 alias fallback이 켜져 있으면 product_type이 None이어도 시도
+    if not treatment_cards_raw and treatments_config.get("_alias_applied_in_code"):
+        treatment_cards_raw = build_treatment_cards(coverages, "generic_2major", treatments_config)
+    headline = build_headline(parsed["customer"]["name"], treatment_cards_raw, treatments_config) if treatment_cards_raw else None
 
-    # 템플릿에 넣을 dict 형태로 변환 (같은 담보의 items를 그룹핑)
+    # 템플릿용 dict 변환
     treatment_cards = []
     for card in treatment_cards_raw:
         groups = group_items_by_coverage(card)
@@ -327,14 +359,20 @@ def process_pdf(pdf_bytes: bytes) -> dict:
         })
 
     return {
-        "customer": asdict(data.customer),
-        "policy": asdict(data.policy),
+        "customer": parsed["customer"],
+        "policy": parsed["policy"],
         "events": mapped_events,
         "extras": [asdict(c) for c in extras],
-        "coverages_all": [asdict(c) for c in data.coverages],
+        "coverages_all": parsed["coverages"],
         "treatment_cards": treatment_cards,
         "headline": asdict(headline) if headline else None,
         "product_type": product_type,
+        # analyzers.json의 report_label이 우선. 없으면 treatments_config 값, 그것도 없으면 "치료비"
+        "report_label": analyzer.get("report_label")
+                        or treatments_config.get("report_title_prefix")
+                        or "치료비",
+        "analyzer_id": analyzer_id,
+        "tab_label": analyzer["tab_label"],
     }
 
 
@@ -348,290 +386,126 @@ def render_html(processed: dict) -> str:
 # Streamlit UI
 # ─────────────────────────────────────────────────────────────
 
+def _render_analyzer_tab(result: dict, pdf_bytes: bytes, source_filename: str):
+    """한 분석기의 결과를 렌더링. 다운로드 버튼 + 인라인 HTML + 검수 expander."""
+    # 파일 정보 주입
+    result = dict(result)  # 캐시 내용 오염 방지 복사
+    result["source_filename"] = source_filename
+    kb = len(pdf_bytes) / 1024
+    result["source_filesize"] = f"{kb:,.1f} KB"
+    html = render_html(result)
+
+    customer_name = result["customer"]["name"]
+    analyzer_id = result["analyzer_id"]
+    report_label = result.get("report_label", "분석")
+
+    # 다운로드 버튼 — analyzer_id를 key에 포함해 탭별 충돌 방지
+    st.download_button(
+        "분석 결과 HTML 다운로드",
+        data=html.encode("utf-8"),
+        file_name=f"{customer_name}_{report_label}_분석.html",
+        mime="text/html",
+        key=f"download_{analyzer_id}",
+    )
+
+    # 인라인 렌더 — 치료 카드가 없을 때는 안내
+    if not result.get("treatment_cards"):
+        st.warning(
+            f"이 가입제안서에서 '{report_label}' 관련 담보를 찾지 못했습니다. "
+            f"상품에 해당 담보가 포함되지 않았거나, 담보명 패턴이 설정과 다를 수 있습니다."
+        )
+    st.components.v1.html(html, height=2200, scrolling=True)
+
+    # 검수 영역 (접혀있음) — 탭별 key 부여
+    with st.expander("파싱 결과 원본 보기 (검수용)"):
+        inner_tab1, inner_tab2 = st.tabs(["담보 전체", "치료 카드 매핑"])
+        with inner_tab1:
+            st.dataframe(
+                result["coverages_all"],
+                use_container_width=True,
+                hide_index=True,
+            )
+        with inner_tab2:
+            pt = result.get("product_type") or "매칭된 상품 타입 없음"
+            st.caption(f"상품 타입: {pt}")
+            if not result.get("treatment_cards"):
+                st.warning("치료 카드가 생성되지 않았습니다.")
+            for card in result.get("treatment_cards", []):
+                with st.container(border=True):
+                    st.markdown(f"**{card['label']}** — {card['subtotal_display'].replace(chr(10), ' ')}")
+                    for g in card["groups"]:
+                        st.caption(f"• {g['coverage_name_short']}")
+                        for it in g["item_list"]:
+                            st.caption(f"    ┗ {it['label']}: {it['display']}")
+
+
+# ─────────────────────────────────────────────────────────────
+# Streamlit UI
+# ─────────────────────────────────────────────────────────────
+
 def main():
     st.set_page_config(
-        page_title="암 담보 보장금액 분석기",
+        page_title="메리츠 보장 분석기",
         layout="wide",
         initial_sidebar_state="collapsed",
     )
 
-    # ─────────────────────────────────────────────────────────────
-    # 전역 스타일: Pretendard + Hero 헤더 + 파일 업로더 재디자인
-    # ─────────────────────────────────────────────────────────────
+    # Streamlit 기본 여백 최소화 + 깔끔한 배경
     st.markdown("""
     <style>
-      @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
-
-      :root {
-        --font-sans: 'Pretendard Variable', Pretendard,
-                     -apple-system, BlinkMacSystemFont, system-ui,
-                     'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-        --red: #E53935;
-        --red-hl: #FECDD3;
-        --red-soft: #FEE8EC;
-        --red-border: #FCD4D4;
-        --ink: #1F1F1F;
-        --muted: #6A6A6A;
-        --bg: #F5F5F5;
-      }
-
-      /* ── 폰트 전역 적용 ── */
-      html, body, [class*="st-"], [class*="css-"],
-      [data-testid="stAppViewContainer"] *,
-      button, input, textarea, select {
-        font-family: var(--font-sans) !important;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        text-rendering: optimizeLegibility;
-        font-feature-settings: 'tnum' on, 'lnum' on;
-      }
-
-      /* ── 기본 레이아웃 ── */
-      .stApp { background: var(--bg); }
+      .block-container { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 1240px; }
       [data-testid="stHeader"] { background: transparent; }
-      .block-container {
-        padding-top: 3rem !important;
-        padding-bottom: 3rem !important;
-        max-width: 1160px !important;
+      .stApp { background: #EEEEEE; }
+      h1, h2 { font-weight: 700 !important; }
+      /* 탭 라벨 크게 */
+      .stTabs [data-baseweb="tab"] {
+        font-size: 15px;
+        font-weight: 600;
+        padding: 8px 20px;
       }
-
-      /* ── Hero 헤더 ── */
-      .hero-wrap { text-align: center; margin-bottom: 36px; }
-
-      .hero-badge {
-        display: inline-flex; align-items: center; gap: 7px;
-        background: #FFFFFF;
-        border: 1.5px solid var(--red);
-        color: var(--red);
-        font-size: 13px; font-weight: 600;
-        padding: 7px 18px;
-        border-radius: 999px;
-        margin-bottom: 22px;
-        letter-spacing: -0.01em;
-      }
-      .hero-badge::before {
-        content: '';
-        width: 13px; height: 13px;
-        border: 1.5px solid var(--red);
-        border-radius: 50%;
-        background: radial-gradient(circle, var(--red) 0 35%, transparent 36%);
-      }
-
-      .hero-title {
-        font-size: 60px; font-weight: 800;
-        letter-spacing: -0.045em; line-height: 1.15;
-        color: var(--ink); margin: 0 0 18px 0;
-      }
-      .hero-title .hl {
-        color: var(--red);
-        background: linear-gradient(transparent 55%, var(--red-hl) 55%, var(--red-hl) 92%, transparent 92%);
-        padding: 0 6px;
-      }
-
-      .hero-subtitle {
-        font-size: 16px; color: var(--muted);
-        line-height: 1.75; margin: 0; font-weight: 500;
-        letter-spacing: -0.015em;
-      }
-      .hero-subtitle b { color: var(--ink); font-weight: 700; }
-
-      /* ── 파일 업로더: 전면 재디자인 ── */
-      [data-testid="stFileUploader"] label { display: none !important; }
-      [data-testid="stFileUploader"] section { padding: 0 !important; }
-
-      /* 드롭존 본체 — 큰 점선 카드. 내부는 건드리지 않고 배경+오버레이로만 표현 */
-      [data-testid="stFileUploaderDropzone"] {
-        position: relative !important;
-        background-color: #FFFFFF !important;
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='76' height='76' viewBox='0 0 76 76' fill='none'><rect width='76' height='76' rx='18' fill='%23FEE8EC'/><path d='M25 48v4a2 2 0 0 0 2 2h22a2 2 0 0 0 2-2v-4' stroke='%23E53935' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/><path d='M38 44V26M31 33l7-7 7 7' stroke='%23E53935' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg>") !important;
-        background-repeat: no-repeat !important;
-        background-position: center 60px !important;
-        border: 2px dashed var(--red-border) !important;
-        border-radius: 24px !important;
-        min-height: 340px !important;
-        cursor: pointer !important;
-        transition: all 0.2s ease !important;
-      }
-      [data-testid="stFileUploaderDropzone"]:hover {
-        border-color: var(--red) !important;
-        background-color: #FFFAFA !important;
-      }
-
-      /* 드롭존 내부 기본 UI(아이콘/문구/Browse 버튼)를 모조리 투명화.
-         opacity: 0은 클릭·드래그 이벤트는 정상 수신되므로 기능은 유지됨. */
-      [data-testid="stFileUploaderDropzone"] > *,
-      [data-testid="stFileUploaderDropzone"] > * * {
-        opacity: 0 !important;
-      }
-
-      /* 커스텀 2줄 안내 — absolute 포지셔닝으로 오버레이 */
-      [data-testid="stFileUploaderDropzone"]::before {
-        content: '제안서 PDF를 여기에 올려주세요';
-        position: absolute;
-        top: 160px; left: 0; right: 0;
-        text-align: center;
-        font-size: 19px; font-weight: 700;
-        color: var(--ink);
-        letter-spacing: -0.025em;
-        pointer-events: none;
-        opacity: 1 !important;
-        z-index: 1;
-      }
-      [data-testid="stFileUploaderDropzone"]::after {
-        content: '파일을 끌어놓거나 클릭해서 선택하세요';
-        position: absolute;
-        top: 196px; left: 0; right: 0;
-        text-align: center;
-        font-size: 14px; font-weight: 500;
-        color: #8A8A8A;
-        letter-spacing: -0.01em;
-        pointer-events: none;
-        opacity: 1 !important;
-        z-index: 1;
-      }
-
-      /* ── 업로드 후 파일 칩 ── */
-      [data-testid="stFileUploaderFile"] {
-        background: #FFFFFF !important;
-        border: 1px solid #E8E8E8 !important;
-        border-radius: 14px !important;
-        padding: 16px 22px !important;
-        margin-top: 0 !important;
-        align-items: center !important;
-      }
-      [data-testid="stFileUploaderFile"] [data-testid="stFileUploaderFileName"] {
-        font-size: 15px; font-weight: 600; color: var(--ink);
-        letter-spacing: -0.015em;
-      }
-
-      /* 삭제(X) 버튼을 "파일 취소 하기" 라벨로 교체 */
-      [data-testid="stFileUploaderDeleteBtn"] {
-        background: #F5F5F5 !important;
-        border: 1px solid #E0E0E0 !important;
-        border-radius: 999px !important;
-        padding: 9px 18px !important;
-        color: var(--muted) !important;
-      }
-      [data-testid="stFileUploaderDeleteBtn"] svg { display: none !important; }
-      [data-testid="stFileUploaderDeleteBtn"]::after {
-        content: '파일 취소 하기';
-        font-size: 13px; font-weight: 500;
-        letter-spacing: -0.01em;
-      }
-
-      /* ── 하단 안내문 ── */
-      .hero-footnote {
-        text-align: center;
-        font-size: 12px; color: #9A9A9A;
-        margin-top: 24px;
-        letter-spacing: -0.01em;
-      }
-
-      /* ── 헤딩 선명도 ── */
-      h1, h2, h3 { font-weight: 700 !important; letter-spacing: -0.025em; }
-
-      /* ── 반응형 ── */
-      @media (max-width: 768px) {
-        .hero-title { font-size: 40px; }
-        [data-testid="stFileUploaderDropzone"] {
-          min-height: 280px !important;
-          background-position: center 44px !important;
-        }
-        [data-testid="stFileUploaderDropzone"]::before {
-          top: 136px;
-          font-size: 17px;
-        }
-        [data-testid="stFileUploaderDropzone"]::after {
-          top: 168px;
-          font-size: 13px;
-        }
+      .stTabs [data-baseweb="tab"][aria-selected="true"] {
+        color: #E53935;
       }
     </style>
     """, unsafe_allow_html=True)
 
-    # ─────────────────────────────────────────────────────────────
-    # Hero 헤더
-    # ─────────────────────────────────────────────────────────────
-    st.markdown("""
-    <div class="hero-wrap">
-      <div class="hero-badge">메리츠화재 "비공식" 매니저 분석지원</div>
-      <h1 class="hero-title"><span class="hl">암 담보</span> 보장금액 분석기</h1>
-      <p class="hero-subtitle">
-        제안서를 올리면<br>
-        <b>암 관련 담보</b>를 자동으로 분석합니다
-      </p>
-    </div>
-    """, unsafe_allow_html=True)
+    registry = load_analyzer_registry()
+
+    st.markdown(
+        "<h1 style='font-size: 26px; margin-bottom: 4px;'>"
+        "<span style='color: #E53935;'>메리츠</span> 보장 분석기</h1>"
+        "<p style='color: #6A6A6A; font-size: 14px; margin-bottom: 24px;'>"
+        "가입제안서 PDF를 한 번 업로드하시면 암 · 2대담보를 탭으로 나눠 분석해 드립니다.</p>",
+        unsafe_allow_html=True
+    )
 
     uploaded = st.file_uploader(
-        "제안서 PDF 선택",
+        "가입제안서 PDF를 업로드하세요",
         type="pdf",
         label_visibility="collapsed",
     )
 
     if not uploaded:
-        st.markdown(
-            '<p class="hero-footnote">'
-            '* 담보 가입금액을 단순 계산한 참고자료입니다. 정확한 보장 내용은 제안서 원본을 확인하세요'
-            '</p>',
-            unsafe_allow_html=True,
-        )
+        # 탭 라벨만 미리 보여주기
+        tab_labels = " · ".join(a["tab_label"] for a in registry)
+        st.info(f"PDF를 업로드하시면 [{tab_labels}] 탭으로 자동 분석됩니다.")
         return
 
     pdf_bytes = uploaded.read()
 
-    # ── 업로드 후: 드롭존을 축소하여 "다른 제안서" 업로드 가능하게 유지 ──
-    st.markdown("""
-    <style>
-      [data-testid="stFileUploaderDropzone"] {
-        min-height: 0 !important;
-        max-height: 56px !important;
-        padding: 0 24px !important;
-        overflow: hidden !important;
-        background-image: none !important;
-        border: 1px solid #E0E0E0 !important;
-        border-radius: 14px !important;
-        border-style: solid !important;
-        cursor: pointer !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-      }
-      [data-testid="stFileUploaderDropzone"]:hover {
-        border-color: var(--red) !important;
-        background-color: #FFFAFA !important;
-      }
-      [data-testid="stFileUploaderDropzone"] > *,
-      [data-testid="stFileUploaderDropzone"] > * * {
-        opacity: 0 !important;
-      }
-      [data-testid="stFileUploaderDropzone"]::before {
-        content: '다른 제안서 올리기';
-        position: absolute;
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 14px; font-weight: 600;
-        color: var(--muted);
-        letter-spacing: -0.015em;
-        pointer-events: none;
-        opacity: 1 !important;
-        z-index: 1;
-      }
-      [data-testid="stFileUploaderDropzone"]::after {
-        display: none !important;
-      }
-    </style>
-    """, unsafe_allow_html=True)
-
+    # 각 분석기를 순차 처리. parse_pdf는 첫 호출에서만 실제 파싱, 이후는 캐시 히트
+    results: dict[str, dict] = {}
     with st.spinner("분석 중..."):
-        processed = process_pdf(pdf_bytes)
-        processed["source_filename"] = uploaded.name
-        kb = len(pdf_bytes) / 1024
-        processed["source_filesize"] = f"{kb:,.1f} KB"
-        html = render_html(processed)
+        for analyzer in registry:
+            results[analyzer["id"]] = build_analyzer_result(pdf_bytes, analyzer["id"])
 
-    # 인라인 렌더
-    st.components.v1.html(html, height=2400, scrolling=True)
+    # 탭 구성 — registry 순서대로
+    tab_labels = [a["tab_label"] for a in registry]
+    tabs = st.tabs(tab_labels)
+
+    for tab, analyzer in zip(tabs, registry):
+        with tab:
+            _render_analyzer_tab(results[analyzer["id"]], pdf_bytes, uploaded.name)
 
 
 if __name__ == "__main__":
