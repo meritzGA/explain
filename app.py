@@ -646,7 +646,7 @@ button, input, textarea, select {
   color: #1F1F1F !important;
 }
 
-/* ── 탭 라벨 크게 ── */
+/* ── (레거시) 탭 라벨 크게 — 현재 Pill 방식으로 대체됨. 다른 곳에서 st.tabs 사용 시 대비용으로 남겨둠 ── */
 .stTabs { margin-top: 24px; }
 .stTabs [data-baseweb="tab-list"] {
   gap: 4px;
@@ -747,13 +747,104 @@ button, input, textarea, select {
         for analyzer in registry:
             results[analyzer["id"]] = build_analyzer_result(pdf_bytes, analyzer["id"])
 
-    # 탭 구성 — registry 순서대로
-    tab_labels = [a["tab_label"] for a in registry]
-    tabs = st.tabs(tab_labels)
+    # ─────────────────────────────────────────────────────────
+    # 큰 Pill Badge 방식 분석기 선택 (탭 대체)
+    # ─────────────────────────────────────────────────────────
+    # 각 분석기마다 pill 색상 정의 (id 기준)
+    pill_styles = {
+        "cancer": {
+            "bg":       "#F4B088",   # 살구 배경
+            "bg_hover": "#EFA071",
+            "text":     "#C44D25",   # 진한 오렌지 텍스트
+        },
+        "two_major": {
+            "bg":       "#8DBEDE",   # 연하늘 배경
+            "bg_hover": "#76AED2",
+            "text":     "#0C447C",   # 진한 네이비 텍스트
+        },
+    }
 
-    for tab, analyzer in zip(tabs, registry):
-        with tab:
-            _render_analyzer_tab(results[analyzer["id"]], pdf_bytes, file_name)
+    # 현재 활성 분석기 결정
+    if "active_analyzer" not in st.session_state:
+        st.session_state.active_analyzer = registry[0]["id"]
+    active_id = st.session_state.active_analyzer
+    if active_id not in {a["id"] for a in registry}:
+        active_id = registry[0]["id"]
+        st.session_state.active_analyzer = active_id
+
+    # Pill 스타일 CSS 주입 — 컬럼 위치(nth-child) 기반 타겟팅.
+    # 버튼 바로 앞 row에 컨테이너 marker를 두어, marker 이후 등장하는 column row들만
+    # pill 스타일이 적용되도록 범위를 제한한다. Streamlit에서 stHorizontalBlock이 columns
+    # 컨테이너이므로 `.pill-row-scope + div[data-testid="stHorizontalBlock"]`로 다음 row를 잡는다.
+    pill_css_parts = []
+    for idx, analyzer in enumerate(registry):
+        aid = analyzer["id"]
+        sty = pill_styles.get(aid, {"bg": "#DDDDDD", "bg_hover": "#CCCCCC", "text": "#333333"})
+        is_active = (aid == active_id)
+        nth = idx + 1  # 1-based
+        # `~` (일반 형제) 사용: marker의 모든 후속 형제 중 horizontal block 안의 nth column
+        # `+` 는 바로 다음 형제만 잡지만, Streamlit이 spinner/status 등 중간 요소를 끼워넣는
+        # 경우가 있어 `~`가 더 안전.
+        # :has() 선택자로 pill-row-scope 마커 이후의 첫 stHorizontalBlock의 nth 컬럼 버튼 타겟팅.
+        # :has()는 Chrome 105+ (2022.9), Safari 15.4+ (2022.3), Firefox 121+ (2023.12) 지원.
+        sel_btn_base = (
+            f'.stMarkdown:has(.pill-row-scope) ~ div[data-testid="stHorizontalBlock"] '
+            f'> div[data-testid="column"]:nth-child({nth}) '
+            f'.stButton > button'
+        )
+        pill_css_parts.append(f"""
+/* Pill #{nth} — {aid} */
+{sel_btn_base} {{
+  background: {sty['bg']} !important;
+  color: {sty['text']} !important;
+  border: none !important;
+  border-radius: 22px !important;
+  font-size: 24px !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.8px !important;
+  padding: 22px 16px !important;
+  width: 100% !important;
+  min-height: 96px !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
+  opacity: {1.0 if is_active else 0.55} !important;
+  transform: {"scale(1.0)" if is_active else "scale(0.97)"} !important;
+}}
+{sel_btn_base}:hover {{
+  background: {sty['bg_hover']} !important;
+  color: {sty['text']} !important;
+  opacity: 1.0 !important;
+  transform: scale(1.0) !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12) !important;
+}}
+{sel_btn_base}:active,
+{sel_btn_base}:focus {{
+  background: {sty['bg']} !important;
+  color: {sty['text']} !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08) !important;
+  outline: none !important;
+}}
+""")
+    pill_css_parts.append("""
+.pill-row-spacer { margin-top: 18px; margin-bottom: 8px; }
+.pill-row-scope { display: none; }
+""")
+    st.markdown(f"<style>{''.join(pill_css_parts)}</style>", unsafe_allow_html=True)
+
+    # Pill 버튼 렌더링
+    st.markdown('<div class="pill-row-spacer"></div>', unsafe_allow_html=True)
+    # scope marker: 이후 첫 stHorizontalBlock(아래 st.columns)을 CSS가 타겟팅
+    st.markdown('<div class="pill-row-scope"></div>', unsafe_allow_html=True)
+    cols = st.columns(len(registry))
+    for col, analyzer in zip(cols, registry):
+        with col:
+            if st.button(analyzer["tab_label"], key=f"pill_btn_{analyzer['id']}", use_container_width=True):
+                st.session_state.active_analyzer = analyzer["id"]
+                st.rerun()
+
+    # 선택된 분석기만 렌더링
+    active_analyzer = next(a for a in registry if a["id"] == active_id)
+    _render_analyzer_tab(results[active_id], pdf_bytes, file_name)
 
 
 if __name__ == "__main__":
