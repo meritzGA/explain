@@ -1,0 +1,794 @@
+{
+  "_comment": "상품 타입별 '암 치료 담보'의 치료 항목 분해 프리셋. 각 담보가 자체적으로 어떤 치료 항목에 얼마씩 지급하는지 약관에서 뽑아 하드코딩. 상품 타입이 같으면 재사용됨.",
+
+  "product_matchers": [
+    {
+      "id": "cancer_focused_30",
+      "name": "30암종 타입 (또 걸려도 또 받는 간편한 암보험 등)",
+      "patterns": [
+        "또.?걸려도",
+        "30종.*통합암진단비",
+        "34.*암종별"
+      ]
+    },
+    {
+      "id": "the_health_5_10_5",
+      "name": "The건강한 5.10.5 시리즈",
+      "patterns": [
+        "The건강한.*5.10.5",
+        "내Mom대로"
+      ]
+    },
+    {
+      "id": "integrated_simple",
+      "name": "통합간편건강보험",
+      "patterns": [
+        "통합간편"
+      ]
+    },
+    {
+      "id": "simple_31",
+      "name": "간편31",
+      "patterns": [
+        "간편31"
+      ]
+    }
+  ],
+
+  "_comment_treatments": "9개 치료 방식 카드 + 그 밖에 진단/수술 카드. 각 카드는 여러 담보의 특정 치료항목 금액 합계.",
+
+  "cancer_treatment_cards": {
+    "cancer_focused_30": [
+      {
+        "id": "targeted",
+        "label": "표적항암약물치료비",
+        "icon": "target_pill",
+        "color_text": "#993C1D",
+        "contributions": [
+          {
+            "match_coverage": "암진단및치료비.*암 통합치료비Ⅲ",
+            "items": [
+              { "label": "(연1회) 표적항암약물치료비", "min": 1000, "max": 3000, "display": "1,000만(3,000만)" }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 항암 약물 치료비", "amount": 500 },
+              { "label": "(연1회) (비급여) 표적 항암 약물 치료비", "amount": 1000 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 항암 약물 치료비", "amount": 500 },
+              { "label": "(연1회) (비급여) 표적항암약물 치료비", "amount": 1000 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "immune",
+        "label": "면역항암약물치료비",
+        "icon": "shield_pill",
+        "color_text": "#993C1D",
+        "contributions": [
+          {
+            "match_coverage": "암진단및치료비.*암 통합치료비Ⅲ",
+            "items": [
+              { "label": "(연1회) 면역항암약물치료비", "min": 1000, "max": 3000, "display": "1,000만(3,000만)" }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 항암 약물 치료비", "amount": 500 },
+              { "label": "(연1회) (비급여) 표적 항암 약물 치료비", "amount": 1000 },
+              { "label": "(연1회) (비급여) 면역 항암 약물 치료비", "amount": 1000 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 항암약물 치료비", "amount": 500 },
+              { "label": "(연1회) (비급여) 표적항암 약물치료비", "amount": 1000 },
+              { "label": "(연1회) (비급여) 면역항암 약물 치료비", "amount": 1000 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "proton",
+        "label": "양성자방사선치료비",
+        "icon": "beam",
+        "color_text": "#993C1D",
+        "contributions": [
+          {
+            "match_coverage": "암진단및치료비.*암 통합치료비Ⅲ",
+            "items": [
+              { "label": "(연1회) 양성자 방사선 치료비", "min": 1000, "max": 3000, "display": "1,000만(3,000만)" }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 항암 방사선 치료비", "amount": 500 },
+              { "label": "(연1회) (비급여) 양성자 방사선 치료비", "amount": 1000 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 항암방사선 치료비", "amount": 500 },
+              { "label": "(연1회) (비급여) 양성자 방사선 치료비", "amount": 1000 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "surgery",
+        "label": "암수술비",
+        "icon": "scalpel",
+        "color_text": "#993C1D",
+        "contributions": [
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(매회) (급여/비급여) 암 수술비", "amount": 500 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(매회) (비급여) 암 수술비", "amount": 500 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "davinci",
+        "label": "다빈치로봇수술비",
+        "icon": "robot",
+        "color_text": "#993C1D",
+        "contributions": [
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(매회) (급여/비급여) 암 수술비", "amount": 500 },
+              { "label": "(매회) (비급여) 다빈치 로봇 수술", "amount": 500 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(매회) (비급여) 암 수술비", "amount": 500 },
+              { "label": "(매회) (비급여) 다빈치 로봇수술", "amount": 500 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chemo",
+        "label": "항암약물치료비",
+        "icon": "pill",
+        "color_text": "#993C1D",
+        "contributions": [
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 항암 약물 치료비", "amount": 500 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 항암 약물 치료비", "amount": 500 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "radiation",
+        "label": "항암방사선치료비",
+        "icon": "radiation",
+        "color_text": "#993C1D",
+        "contributions": [
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 항암 방사선 치료비", "amount": 500 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 항암방사선 치료비", "amount": 500 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "carbon_ion",
+        "label": "중입자방사선치료비",
+        "icon": "atom",
+        "color_text": "#993C1D",
+        "contributions": [
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 항암 방사선 치료비", "amount": 500 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 항암 방사선 치료비", "amount": 500 }
+            ]
+          },
+          {
+            "match_coverage": "항암중입자방사선치료비",
+            "items": [
+              { "label": "(최초1회) 중입자방사선치료비", "amount": 5000, "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "imrt",
+        "label": "세기조절방사선치료비",
+        "icon": "focus",
+        "color_text": "#993C1D",
+        "contributions": [
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 항암 방사선 치료비", "amount": 500 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 항암 방사선 치료비", "amount": 500 }
+            ]
+          }
+        ]
+      }
+    ],
+
+    "the_health_5_10_5": [
+      {
+        "id": "targeted",
+        "label": "표적항암약물치료비",
+        "icon": "target_pill",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "암진단및치료비.*암 통합치료비Ⅲ",
+            "items": [
+              { "label": "(연1회) 표적항암약물치료비", "min": 1500, "max": 3000, "display": "1,500만(3,000만)", "follow_coverage_scale": true }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 암 주요치료 (항암약물)", "amount": 750 },
+              { "label": "(연1회) (비급여) 표적항암약물허가치료", "amount": 2000 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 암(유사암제외) 항암약물치료", "amount": 1000 },
+              { "label": "(연1회) (비급여) 표적항암약물허가치료", "amount": 3000 }
+            ]
+          },
+          {
+            "match_coverage": "표적항암약물허가치료비.*1종이상",
+            "exclusive_group": "targeted_renew",
+            "items": [
+              { "label": "(연1회) 표적항암약물 1종이상", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "표적항암약물허가치료비.*2종이상",
+            "exclusive_group": "targeted_renew",
+            "items": [
+              { "label": "(연1회) 표적항암약물 2종이상", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "표적항암약물허가치료비.*3종이상",
+            "exclusive_group": "targeted_renew",
+            "items": [
+              { "label": "(연1회) 표적항암약물 3종이상", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "비급여 항암약물치료비",
+            "items": [
+              { "label": "(연1회) 비급여 항암약물치료", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "immune",
+        "label": "면역항암약물치료비",
+        "icon": "shield_pill",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "암진단및치료비.*암 통합치료비Ⅲ",
+            "items": [
+              { "label": "(연1회) 면역항암약물치료비", "min": 1500, "max": 3000, "display": "1,500만(3,000만)" }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 암 주요치료 (항암약물)", "amount": 750 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 암(유사암제외) 항암약물치료", "amount": 1000 },
+              { "label": "(연1회) (비급여) 특정면역항암약물허가치료", "amount": 3000 }
+            ]
+          },
+          {
+            "match_coverage": "비급여 항암약물치료비",
+            "items": [
+              { "label": "(연1회) 비급여 항암약물치료", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "proton",
+        "label": "양성자방사선치료비",
+        "icon": "beam",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "암진단및치료비.*암 통합치료비Ⅲ",
+            "items": [
+              { "label": "(연1회) 양성자방사선치료비", "min": 1500, "max": 3000, "display": "1,500만(3,000만)" }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 암 주요치료 (항암방사선)", "amount": 750 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 암(유사암제외) 항암방사선치료", "amount": 1000 },
+              { "label": "(연1회) (비급여) 항암양성자방사선치료", "amount": 3000 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "surgery",
+        "label": "암수술비",
+        "icon": "scalpel",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "^암수술비\\(유사암제외\\)",
+            "items": [
+              { "label": "(매회) 암 수술비", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(매회) (급여/비급여) 암 수술비", "amount": 750 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(매회) (비급여) 암(유사암제외) 수술", "amount": 1000 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "davinci",
+        "label": "다빈치로봇수술비",
+        "icon": "robot",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "^암수술비\\(유사암제외\\)",
+            "items": [
+              { "label": "(매회) 암 수술비", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(매회) (급여/비급여) 암 수술비", "amount": 750 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(매회) (비급여) 암(유사암제외) 수술", "amount": 1000 },
+              { "label": "(연1회) (비급여) 암(특정암제외) 다빈치로봇수술", "amount": 1000 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chemo",
+        "label": "항암약물치료비",
+        "icon": "pill",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "^항암방사선약물치료비",
+            "items": [
+              { "label": "(최초1회) 항암약물치료비", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 암 주요치료 (항암약물)", "amount": 750 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 암(유사암제외) 항암약물치료", "amount": 1000 }
+            ]
+          },
+          {
+            "match_coverage": "비급여 항암약물치료비",
+            "items": [
+              { "label": "(연1회) 비급여 항암약물치료", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "비급여 암 주요치료비",
+            "items": [
+              { "label": "(연1회) 비급여 암 주요치료비", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "radiation",
+        "label": "항암방사선치료비",
+        "icon": "radiation",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "^항암방사선약물치료비",
+            "items": [
+              { "label": "(최초1회) 항암방사선치료비", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 암 주요치료 (항암방사선)", "amount": 750 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 암(유사암제외) 항암방사선치료", "amount": 1000 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "carbon_ion",
+        "label": "중입자방사선치료비",
+        "icon": "atom",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "^항암중입자방사선치료비",
+            "items": [
+              { "label": "(최초1회) 중입자방사선치료비", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 암 주요치료 (항암방사선)", "amount": 750 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 암(유사암제외) 항암방사선치료", "amount": 1000 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "imrt",
+        "label": "세기조절방사선치료비",
+        "icon": "focus",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "^암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) 항암세기조절방사선치료", "amount": 750 }
+            ]
+          },
+          {
+            "match_coverage": "^암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 암(유사암제외) 항암방사선치료", "amount": 1000 }
+            ]
+          }
+        ]
+      }
+    ],
+
+    "integrated_simple": [
+      {
+        "id": "targeted",
+        "label": "표적항암약물치료비",
+        "icon": "target_pill",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "암진단및치료비.*암 통합치료비Ⅲ",
+            "items": [
+              { "label": "(연1회) 표적항암약물치료비", "min": 1500, "max": 3000, "display": "1,500만(3,000만)" }
+            ]
+          },
+          {
+            "match_coverage": "^갱신형 암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 암 주요치료 (항암약물)", "amount": 750 },
+              { "label": "(연1회) (비급여) 표적항암약물허가치료", "amount": 2000 }
+            ]
+          },
+          {
+            "match_coverage": "^갱신형 암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 암(유사암제외) 항암약물치료", "amount": 1000 },
+              { "label": "(연1회) (비급여) 표적항암약물허가치료", "amount": 3000 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "immune",
+        "label": "면역항암약물치료비",
+        "icon": "shield_pill",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "암진단및치료비.*암 통합치료비Ⅲ",
+            "items": [
+              { "label": "(연1회) 면역항암약물치료비", "min": 1500, "max": 3000, "display": "1,500만(3,000만)" }
+            ]
+          },
+          {
+            "match_coverage": "^갱신형 암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 암 주요치료 (항암약물)", "amount": 750 }
+            ]
+          },
+          {
+            "match_coverage": "^갱신형 암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 암(유사암제외) 항암약물치료", "amount": 1000 },
+              { "label": "(연1회) (비급여) 특정면역항암약물허가치료", "amount": 3000 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "proton",
+        "label": "양성자방사선치료비",
+        "icon": "beam",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "암진단및치료비.*암 통합치료비Ⅲ",
+            "items": [
+              { "label": "(연1회) 양성자방사선치료비", "min": 1500, "max": 3000, "display": "1,500만(3,000만)" }
+            ]
+          },
+          {
+            "match_coverage": "^갱신형 암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 암 주요치료 (항암방사선)", "amount": 750 }
+            ]
+          },
+          {
+            "match_coverage": "^갱신형 암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 암(유사암제외) 항암방사선치료", "amount": 1000 },
+              { "label": "(연1회) (비급여) 항암양성자방사선치료", "amount": 3000 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "surgery",
+        "label": "암수술비",
+        "icon": "scalpel",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "^갱신형 암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(매회) (급여/비급여) 암 수술비", "amount": 750 }
+            ]
+          },
+          {
+            "match_coverage": "^갱신형 암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(매회) (비급여) 암(유사암제외) 수술", "amount": 1000 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "davinci",
+        "label": "다빈치로봇수술비",
+        "icon": "robot",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "^갱신형 암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(매회) (급여/비급여) 암 수술비", "amount": 750 }
+            ]
+          },
+          {
+            "match_coverage": "^갱신형 암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(매회) (비급여) 암(유사암제외) 수술", "amount": 1000 },
+              { "label": "(연1회) (비급여) 암(특정암제외) 다빈치로봇수술", "amount": 1000 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chemo",
+        "label": "항암약물치료비",
+        "icon": "pill",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "^갱신형 암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 암 주요치료 (항암약물)", "amount": 750 }
+            ]
+          },
+          {
+            "match_coverage": "^갱신형 암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 암(유사암제외) 항암약물치료", "amount": 1000 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "radiation",
+        "label": "항암방사선치료비",
+        "icon": "radiation",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "^갱신형 암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) (급여/비급여) 암 주요치료 (항암방사선)", "amount": 750 }
+            ]
+          },
+          {
+            "match_coverage": "^갱신형 암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 암(유사암제외) 항암방사선치료", "amount": 1000 }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "imrt",
+        "label": "세기조절방사선치료비",
+        "icon": "focus",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "^갱신형 암 통합치료비\\(기본형\\)",
+            "items": [
+              { "label": "(연1회) 항암세기조절방사선치료", "amount": 750 }
+            ]
+          },
+          {
+            "match_coverage": "^갱신형 암 통합치료비Ⅱ",
+            "items": [
+              { "label": "(연1회) (비급여) 암(유사암제외) 항암방사선치료", "amount": 1000 }
+            ]
+          }
+        ]
+      }
+    ],
+
+    "simple_31": [
+      {
+        "id": "davinci",
+        "label": "다빈치로봇수술비",
+        "icon": "robot",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "다빈치로봇 암수술비\\(암\\(특정암제외\\)\\)",
+            "items": [
+              { "label": "(최초1회) 다빈치로봇 암수술비 (특정암 제외)", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "다빈치로봇 암수술비\\(특정암\\)",
+            "items": [
+              { "label": "(최초1회) 다빈치로봇 암수술비 (특정암)", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chemo",
+        "label": "항암약물치료비",
+        "icon": "pill",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "항암방사선약물치료비",
+            "items": [
+              { "label": "(최초1회) 항암약물치료비", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "radiation",
+        "label": "항암방사선치료비",
+        "icon": "radiation",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "항암방사선약물치료비",
+            "items": [
+              { "label": "(최초1회) 항암방사선치료비", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "carbon_ion",
+        "label": "중입자방사선치료비",
+        "icon": "atom",
+        "color_text": "#E53935",
+        "contributions": [
+          {
+            "match_coverage": "항암중입자방사선치료비",
+            "items": [
+              { "label": "(최초1회) 항암중입자방사선치료비", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+
+  "_comment_fiveyear": "5년 합계 계산용 배수",
+  "five_year_multiplier": 5,
+  "five_year_kicker_tpl": "{customer_name}님이 5년간 보장받을 수 있는 암 치료비는 최대"
+}

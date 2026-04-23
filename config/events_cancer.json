@@ -1,0 +1,233 @@
+{
+  "_comment": "이벤트 매핑 룰. 순서가 중요 — 구체적인 이벤트를 먼저 배치하여 담보를 선점.",
+
+  "events": [
+    {
+      "id": "minor_cancer",
+      "label": "유사암 진단",
+      "color": { "band": "#B8447A", "text": "#993556", "bg": "#FBEAF0" },
+      "icon": "mini_circle",
+      "question": "유사암으로 진단이 확정되면",
+      "description": "제자리암 · 기타피부암 · 경계성종양 · 갑상선암 · 각각 최초 1회한 지급됩니다.",
+      "period": "once",
+      "include_any": [
+        "유사암진단비",
+        "유사암수술비",
+        "유사암.*통합치료",
+        "유사암.*치료비"
+      ],
+      "exclude_any": []
+    },
+    {
+      "id": "brain_vascular",
+      "label": "뇌혈관질환",
+      "color": { "band": "#6E65C9", "text": "#3C3489", "bg": "#EEEDFE" },
+      "icon": "brain",
+      "question": "뇌졸중 등 뇌혈관질환 진단과 치료를 받으시면",
+      "description": "진단 즉시와 수술·혈전치료시 각각 지급되는 금액을 합한 최대치입니다.",
+      "period": "combined",
+      "subgroups": [
+        { "label": "진단받으실 때", "match": "진단비|산정특례.*진단" },
+        { "label": "수술과 치료를 받으실 때", "match": "치료비|수술비|혈전" }
+      ],
+      "include_any": [
+        "뇌혈관",
+        "뇌졸중",
+        "뇌출혈",
+        "뇌경색",
+        "혈전용해.*뇌졸중"
+      ],
+      "exclude_any": []
+    },
+    {
+      "id": "ischemic_heart",
+      "label": "허혈성심장질환",
+      "color": { "band": "#C83B3B", "text": "#A32D2D", "bg": "#FCEBEB" },
+      "icon": "heart",
+      "question": "급성심근경색 등 허혈성심장질환 진단과 치료를 받으시면",
+      "description": "진단 즉시와 수술·혈전치료시 각각 지급되는 금액을 합한 최대치입니다.",
+      "period": "combined",
+      "subgroups": [
+        { "label": "진단받으실 때", "match": "진단비|산정특례.*진단" },
+        { "label": "수술과 치료를 받으실 때", "match": "치료비|수술비|혈전" }
+      ],
+      "include_any": [
+        "허혈성심장",
+        "급성심근경색",
+        "심근경색",
+        "혈전용해.*특정심장",
+        "131대질병수술비.*심장",
+        "중증질환자.*심장",
+        "산정특례.*심장"
+      ],
+      "exclude_any": []
+    },
+    {
+      "id": "circulatory_system",
+      "label": "특정 순환계질환",
+      "color": { "band": "#D68412", "text": "#854F0B", "bg": "#FAEEDA" },
+      "icon": "pulse",
+      "question": "부정맥 · 심부전 · 대동맥류 등 순환계 질환 치료를 받으시면",
+      "description": "심장·뇌혈관 외에 다양한 순환계 중증질환까지 폭넓게 보장합니다.",
+      "period": "annual_max",
+      "include_any": [
+        "특정순환계질환"
+      ],
+      "exclude_any": []
+    },
+    {
+      "id": "cancer_treatment",
+      "label": "암 수술 · 치료",
+      "color": { "band": "#D68412", "text": "#854F0B", "bg": "#FAEEDA" },
+      "icon": "hospital",
+      "question": "수술과 항암치료를 받으시면",
+      "description": "치료 방법과 병원 등급에 따라 실제 수령액은 달라집니다. 아래는 주요 조건을 충족했을 때의 합산 금액입니다.",
+      "period": "annual_max",
+      "include_any": [
+        "암.*통합치료비",
+        "암수술비",
+        "항암",
+        "다빈치로봇.*암",
+        "표적항암",
+        "상급종합병원.*암.*치료비",
+        "암.*통합치료 생활비",
+        "131대질병수술비.*특정31대"
+      ],
+      "exclude_any": []
+    },
+    {
+      "id": "cancer_diagnosis",
+      "label": "암 진단",
+      "color": { "band": "#C44D25", "text": "#993C1D", "bg": "#FAECE7" },
+      "icon": "ribbon",
+      "question": "암(유사암 제외) 진단이 확정되면",
+      "description": "진단받은 즉시 한 번에 지급됩니다. 치료 여부와 관계없이 받으실 수 있습니다.",
+      "unit": "일시금",
+      "period": "once",
+      "include_any": [
+        "암진단비",
+        "통합암진단비"
+      ],
+      "exclude_any": [
+        "유사암진단비"
+      ]
+    },
+    {
+      "id": "transplant",
+      "label": "장기 이식",
+      "color": { "band": "#B8447A", "text": "#993556", "bg": "#FBEAF0" },
+      "icon": "transplant",
+      "question": "장기 이식 수술을 받으시면",
+      "description": "이식 종류별로 따로 지급됩니다.",
+      "period": "per_type",
+      "include_any": [
+        "이식수술",
+        "조혈모세포",
+        "5대장기"
+      ],
+      "exclude_any": []
+    },
+    {
+      "id": "fracture_burn",
+      "label": "골절 · 화상",
+      "color": { "band": "#D68412", "text": "#854F0B", "bg": "#FAEEDA" },
+      "icon": "bone",
+      "question": "골절이나 화상을 당하셨을 때",
+      "description": "골절 종류와 화상 정도에 따라 각각 정해진 금액이 지급됩니다.",
+      "period": "combined",
+      "include_any": [
+        "골절",
+        "화상",
+        "부식"
+      ],
+      "exclude_any": []
+    },
+    {
+      "id": "hospital_stay",
+      "label": "입원",
+      "color": { "band": "#12855F", "text": "#0F6E56", "bg": "#E1F5EE" },
+      "icon": "bed",
+      "question": "입원하셨을 때",
+      "description": "간병인 사용 여부와 중환자실 입원에 따라 일당이 다르게 지급됩니다.",
+      "period": "per_day",
+      "include_any": [
+        "입원일당",
+        "중환자실.*입원",
+        "간병인사용",
+        "간호.?간병통합"
+      ],
+      "exclude_any": []
+    },
+    {
+      "id": "injury_death_disability",
+      "label": "상해 사망 · 후유장해",
+      "color": { "band": "#12855F", "text": "#0F6E56", "bg": "#E1F5EE" },
+      "icon": "shield",
+      "question": "상해로 사망하시거나 장해가 남으면",
+      "description": "상해로 사망하시거나 후유장해가 남으실 때 지급됩니다.",
+      "period": "combined",
+      "include_any": [
+        "일반상해사망",
+        "상해사망",
+        "후유장해"
+      ],
+      "exclude_any": []
+    },
+    {
+      "id": "premium_waiver",
+      "label": "보험료 납입지원",
+      "color": { "band": "#B8447A", "text": "#993556", "bg": "#FBEAF0" },
+      "icon": "coin",
+      "question": "유사암 진단시 추가 혜택",
+      "description": "유사암 진단시 매월 만기까지 보험료를 지원해 드립니다.",
+      "period": "monthly",
+      "include_any": [
+        "보험료납입지원"
+      ],
+      "exclude_any": []
+    },
+    {
+      "id": "benign_tumor",
+      "label": "양성 뇌종양",
+      "color": { "band": "#6E65C9", "text": "#3C3489", "bg": "#EEEDFE" },
+      "icon": "brain",
+      "question": "양성 뇌종양으로 진단이 확정되면",
+      "description": "최초 1회한 지급됩니다.",
+      "period": "once",
+      "include_any": [
+        "양성뇌종양"
+      ],
+      "exclude_any": []
+    },
+    {
+      "id": "general_surgery",
+      "label": "일반 수술",
+      "color": { "band": "#378ADD", "text": "#0C447C", "bg": "#E6F1FB" },
+      "icon": "scissors",
+      "question": "일반 질병·상해 수술을 받으시면",
+      "description": "수술 종류(1~5종)와 질병 분류에 따라 금액이 다릅니다.",
+      "period": "per_surgery",
+      "include_any": [
+        "수술비Ⅱ",
+        "질병수술비",
+        "상해수술비",
+        "131대질병수술비",
+        "다빈치로봇.*수술"
+      ],
+      "exclude_any": []
+    }
+  ],
+
+  "exclusive_pairs": [
+    ["간병인사용", "간호.?간병통합"]
+  ],
+
+  "_comment_products": "상품명 패턴 → 컨셉 템플릿 키. Day 2에서 채울 예정.",
+  "product_concept_map": {
+    "간편31": "cancer_focused",
+    "또.?걸려도.?또.?받는": "cancer_focused_recurring",
+    "The건강한.*5.10.5": "comprehensive_5_10_5",
+    "내Mom대로": "comprehensive_5_10_5",
+    "통합간편건강": "cancer_plus_hospital"
+  }
+}

@@ -1,0 +1,233 @@
+{
+  "_comment": "2대담보(뇌혈관 + 허혈성심장) 치료 단계별 서브카드 프리셋. 암 분석기의 treatments.json과 동일한 스키마. 상품 타입이 같으면 재사용됨.",
+
+  "report_title_prefix": "2대담보 치료비",
+  "report_subtitle": "가입제안서 기반 2대담보 치료비 간편 분석 리포트",
+
+  "product_matchers": [
+    {
+      "id": "integrated_simple",
+      "name": "통합간편건강보험",
+      "patterns": [
+        "통합간편"
+      ]
+    },
+    {
+      "id": "the_health_5_10_5",
+      "name": "The건강한 5.10.5 시리즈",
+      "patterns": [
+        "The건강한.*5.10.5",
+        "내Mom대로"
+      ]
+    },
+    {
+      "id": "simple_31",
+      "name": "간편31",
+      "patterns": [
+        "간편31"
+      ]
+    },
+    {
+      "id": "generic_2major",
+      "name": "일반 2대담보 매칭 (fallback)",
+      "patterns": [
+        "메리츠"
+      ]
+    }
+  ],
+
+  "_comment_cards": "두 그룹 — 뇌혈관(brain) 5카드 + 허혈성심장(heart) 5카드. 각 카드는 '진단비/수술비/혈전/관상동맥우회술/스텐트' 같은 치료 단계.",
+
+  "cancer_treatment_cards": {
+    "generic_2major": [
+      {
+        "id": "brain_diagnosis",
+        "label": "뇌혈관질환 진단비",
+        "icon": "ribbon",
+        "color_text": "#3C3489",
+        "contributions": [
+          {
+            "match_coverage": "뇌혈관질환진단비",
+            "items": [
+              { "label": "(최초1회) 뇌혈관질환 진단시", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "뇌졸중진단비",
+            "items": [
+              { "label": "(최초1회) 뇌졸중 진단시", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "뇌출혈진단비",
+            "items": [
+              { "label": "(최초1회) 뇌출혈 진단시", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "brain_surgery",
+        "label": "뇌혈관질환 수술비",
+        "icon": "scissors",
+        "color_text": "#3C3489",
+        "contributions": [
+          {
+            "match_coverage": "뇌혈관질환수술비",
+            "items": [
+              { "label": "(매회) 뇌혈관질환 수술시", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "뇌졸중수술비",
+            "items": [
+              { "label": "(매회) 뇌졸중 수술시", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "brain_thrombolysis",
+        "label": "뇌졸중 혈전용해치료비",
+        "icon": "pill",
+        "color_text": "#3C3489",
+        "contributions": [
+          {
+            "match_coverage": "혈전용해.*뇌|뇌.*혈전용해",
+            "items": [
+              { "label": "(매회) 뇌졸중 혈전용해치료시", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "brain_special_surgery",
+        "label": "뇌혈관질환 특정수술비",
+        "icon": "robot",
+        "color_text": "#3C3489",
+        "contributions": [
+          {
+            "match_coverage": "131대질병수술비.*뇌",
+            "items": [
+              { "label": "(매회) 131대 질병수술비 중 뇌혈관", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "중증질환자.*뇌",
+            "items": [
+              { "label": "(최초1회) 중증질환자 진단비 (뇌)", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "heart_diagnosis",
+        "label": "허혈성심장질환 진단비",
+        "icon": "ribbon",
+        "color_text": "#A32D2D",
+        "contributions": [
+          {
+            "match_coverage": "허혈성심장질환진단비",
+            "items": [
+              { "label": "(최초1회) 허혈성심장질환 진단시", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "급성심근경색.*진단비",
+            "items": [
+              { "label": "(최초1회) 급성심근경색 진단시", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "heart_surgery",
+        "label": "허혈성심장질환 수술비",
+        "icon": "scissors",
+        "color_text": "#A32D2D",
+        "contributions": [
+          {
+            "match_coverage": "허혈성심장질환수술비",
+            "items": [
+              { "label": "(매회) 허혈성심장질환 수술시", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "급성심근경색.*수술",
+            "items": [
+              { "label": "(매회) 급성심근경색 수술시", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "heart_thrombolysis",
+        "label": "허혈성심장질환 혈전용해치료비",
+        "icon": "pill",
+        "color_text": "#A32D2D",
+        "contributions": [
+          {
+            "match_coverage": "혈전용해.*특정심장|특정심장.*혈전용해|혈전용해.*심장|심장.*혈전용해",
+            "items": [
+              { "label": "(매회) 특정심장 혈전용해치료시", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "heart_cabg",
+        "label": "관상동맥우회술 치료비",
+        "icon": "pulse",
+        "color_text": "#A32D2D",
+        "contributions": [
+          {
+            "match_coverage": "관상동맥우회",
+            "items": [
+              { "label": "(매회) 관상동맥우회술 시", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "heart_stent",
+        "label": "관상동맥 스텐트삽입술 치료비",
+        "icon": "target_pill",
+        "color_text": "#A32D2D",
+        "contributions": [
+          {
+            "match_coverage": "스텐트",
+            "items": [
+              { "label": "(매회) 스텐트삽입술 시", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "heart_special_surgery",
+        "label": "심장 특정수술비",
+        "icon": "robot",
+        "color_text": "#A32D2D",
+        "contributions": [
+          {
+            "match_coverage": "131대질병수술비.*심장",
+            "items": [
+              { "label": "(매회) 131대 질병수술비 중 심장", "follow_coverage_amount": true }
+            ]
+          },
+          {
+            "match_coverage": "중증질환자.*심장",
+            "items": [
+              { "label": "(최초1회) 중증질환자 진단비 (심장)", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+
+  "_comment_alias": "각 product_type은 generic_2major 카드를 기본으로 사용. 향후 상품별 특화 프리셋이 필요하면 별도 key로 재정의.",
+  "_alias_applied_in_code": true,
+
+  "five_year_multiplier": 5,
+  "five_year_kicker_tpl": "{customer_name}님의 2대담보 치료비 보장금액은 5년 기준 최대"
+}

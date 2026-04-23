@@ -1,0 +1,24 @@
+{
+  "_comment": "탭 방식 통합 분석기의 레지스트리. 탭 추가하려면 이 파일에 항목 하나 추가 + 해당 config 파일 2개(events_*, treatments_*) 준비하면 끝.",
+
+  "analyzers": [
+    {
+      "id": "cancer",
+      "tab_label": "암 보장 분석",
+      "report_label": "암 치료비",
+      "events_config": "events_cancer.json",
+      "treatments_config": "treatments_cancer.json",
+      "description": "가입제안서 PDF를 분석해 고객이 받을 수 있는 암 치료비를 치료 방식별로 정리합니다."
+    },
+    {
+      "id": "two_major",
+      "tab_label": "2대담보 분석",
+      "report_label": "2대담보 치료비",
+      "events_config": "events_2major.json",
+      "treatments_config": "treatments_2major.json",
+      "description": "뇌혈관질환과 허혈성심장질환 보장을 치료 단계별로 정리합니다."
+    }
+  ],
+
+  "_comment_future": "향후 탭 추가 예시: '간병·입원 분석', '상해·재해 분석' 등. 각 탭마다 events_*.json + treatments_*.json 한 쌍 필요."
+}
