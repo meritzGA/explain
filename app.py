@@ -355,7 +355,7 @@ def build_analyzer_result(pdf_bytes: bytes, analyzer_id: str) -> dict:
             "subtotal_min": card.subtotal_min,
             "subtotal_max": card.subtotal_max,
             "subtotal_display": card.subtotal_display,
-            "recurring": card.recurring,
+            "recurring": getattr(card, "recurring", True),
             "groups": groups,
         })
 

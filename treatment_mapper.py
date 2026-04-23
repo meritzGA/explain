@@ -215,7 +215,7 @@ class TreatmentCard:
     label: str
     icon: str
     color_text: str
-    items: list[TreatmentItem] = field(default_factory=list)
+    items: list = field(default_factory=list)
     subtotal_min: int = 0
     subtotal_max: int = 0
     # True(기본): 매년 반복 지급 가능 → 5년 헤드라인 계산시 × 5
