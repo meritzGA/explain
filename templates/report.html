@@ -423,7 +423,9 @@ button, input, select, textarea { font-family: var(--font-sans); }
       <div class="tx-head">
         <div class="tx-icon">{{ tx_icon(card.icon) | safe }}</div>
         <div class="tx-total">
-          <div class="tx-total-label">보장 합산</div>
+          <div class="tx-total-label">
+            {% if card.recurring is sameas false %}평생 1회 지급{% else %}보장 합산{% endif %}
+          </div>
           <div class="tx-total-amount">{{ card.subtotal_display | replace('\n', '') }}</div>
         </div>
       </div>
