@@ -573,6 +573,74 @@ button, input, textarea, select {
   letter-spacing: -0.2px;
 }
 
+/* ─────────────────────────────────────────────────────────
+   업로드 완료 상태 — 박스 축소 + 파일 정보 카드 스타일
+   ─────────────────────────────────────────────────────────
+   파일이 업로드되면 [data-testid="stFileUploader"] 안에
+   [data-testid="stFileUploaderFile"] 요소가 나타남.
+   CSS :has()로 이 상태를 감지해 스타일 전환. */
+
+/* 업로드 완료 시 dropzone을 완전히 숨김 */
+[data-testid="stFileUploader"]:has([data-testid="stFileUploaderFile"]) [data-testid="stFileUploaderDropzone"] {
+  display: none !important;
+}
+
+/* 업로드된 파일 카드 — 흰 배경, 라운드, 좌우 배치 */
+[data-testid="stFileUploaderFile"] {
+  background: #FFFFFF !important;
+  border: 1px solid #F0F0F0 !important;
+  border-radius: 20px !important;
+  padding: 14px 22px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+}
+
+/* 파일명 */
+[data-testid="stFileUploaderFileName"] {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: #1F1F1F !important;
+  letter-spacing: -0.3px;
+}
+
+/* 파일 크기 라벨 */
+[data-testid="stFileUploaderFile"] small {
+  font-size: 12px !important;
+  color: #9A9A9A !important;
+  font-weight: 500 !important;
+}
+
+/* 파일 삭제 버튼을 pill 버튼으로 + 텍스트 치환 */
+[data-testid="stFileUploaderDeleteBtn"] button {
+  background: #F5F5F5 !important;
+  color: #6A6A6A !important;
+  border: none !important;
+  border-radius: 999px !important;
+  padding: 8px 18px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.2px;
+  transition: all 0.15s ease;
+  min-width: 100px !important;
+}
+[data-testid="stFileUploaderDeleteBtn"] button:hover {
+  background: #E8E8E8 !important;
+  color: #1F1F1F !important;
+}
+
+/* 삭제 버튼의 기본 X 아이콘 숨기고 "파일 취소 하기" 텍스트 표시 */
+[data-testid="stFileUploaderDeleteBtn"] button svg,
+[data-testid="stFileUploaderDeleteBtn"] svg {
+  display: none !important;
+}
+[data-testid="stFileUploaderDeleteBtn"] button::after {
+  content: "파일 취소 하기";
+  display: inline-block;
+  white-space: nowrap;
+}
+
 /* ── 탭 라벨 크게 ── */
 .stTabs { margin-top: 24px; }
 .stTabs [data-baseweb="tab-list"] {
@@ -616,16 +684,15 @@ button, input, textarea, select {
         label_visibility="collapsed",
     )
 
-    # 업로더 하단 안내 문구
-    st.markdown(
-        '<div class="uploader-helper">'
-        '* 가입제안서안에 있는 담보 가입금액을 꼭 계산해보고 참고용으로만 사용하세요'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-
+    # 업로더 하단 안내 문구 — 업로드 전에만 표시
     if not uploaded:
-        return  # info 박스 없이 업로더만 깔끔하게 보여주고 끝
+        st.markdown(
+            '<div class="uploader-helper">'
+            '* 가입제안서안에 있는 담보 가입금액을 꼭 계산해보고 참고용으로만 사용하세요'
+            '</div>',
+            unsafe_allow_html=True,
+        )
+        return  # 업로드 대기 상태
 
     pdf_bytes = uploaded.read()
 
