@@ -452,118 +452,113 @@ def main():
         initial_sidebar_state="collapsed",
     )
 
-    # ── Pretendard 폰트를 Streamlit 메인 프레임에도 강제 주입 + 프리미엄 스타일 ──
-    st.markdown("""
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="stylesheet" as="style" crossorigin
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-    <style>
-      /* ── Pretendard를 Streamlit 전역에 강제 적용 ── */
-      html, body, [class*="css"], .stApp, .stApp *,
-      .stMarkdown, .stMarkdown *, [data-testid="stMarkdownContainer"] *,
-      [data-testid="stFileUploader"] *, [data-testid="stTabs"] *,
-      button, input, textarea, select {
-        font-family: 'Pretendard Variable', Pretendard,
-                     -apple-system, BlinkMacSystemFont, system-ui,
-                     'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR',
-                     'Malgun Gothic', sans-serif !important;
-        font-feature-settings: 'tnum' on, 'ss03' on;
-      }
+    # ── 프리미엄 스타일: Pretendard 폰트 + 헤드 타이틀 + 업로더 + 탭 ──
+    # @import로 폰트 로드 (link 태그는 Streamlit이 제거할 수 있음).
+    # triple-quoted 내부는 들여쓰기 없이 시작해야 markdown 파서가 code block으로 오인하지 않음.
+    st.markdown("""<style>
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
 
-      /* 배경과 여백 */
-      .stApp { background: #EEEEEE; }
-      [data-testid="stHeader"] { background: transparent; }
-      .block-container {
-        padding-top: 2.5rem;
-        padding-bottom: 2rem;
-        max-width: 1240px;
-      }
+/* ── Pretendard를 Streamlit 전역에 강제 적용 ── */
+html, body, .stApp, .stApp *,
+.stMarkdown *, [data-testid="stMarkdownContainer"] *,
+[data-testid="stFileUploader"] *, [data-testid="stTabs"] *,
+button, input, textarea, select {
+  font-family: 'Pretendard Variable', Pretendard,
+               -apple-system, BlinkMacSystemFont, system-ui,
+               'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR',
+               'Malgun Gothic', sans-serif !important;
+  font-feature-settings: 'tnum' on, 'ss03' on;
+}
 
-      /* ── 커다란 헤드 타이틀 ── */
-      .hero-title {
-        font-size: 56px;
-        font-weight: 800;
-        letter-spacing: -2px;
-        line-height: 1.05;
-        color: #1F1F1F;
-        margin: 0 0 8px 0;
-      }
-      .hero-title .brand {
-        color: #E53935;
-        letter-spacing: -2.5px;
-      }
-      .hero-sub {
-        color: #6A6A6A;
-        font-size: 16px;
-        font-weight: 500;
-        letter-spacing: -0.3px;
-        margin: 0 0 32px 0;
-      }
+/* 배경과 여백 */
+.stApp { background: #EEEEEE; }
+[data-testid="stHeader"] { background: transparent; }
+.block-container {
+  padding-top: 2.5rem;
+  padding-bottom: 2rem;
+  max-width: 1240px;
+}
 
-      /* ── 파일 업로더 프리미엄 스타일 ── */
-      [data-testid="stFileUploader"] {
-        background: #FFFFFF;
-        border: 1.5px dashed #CCCCCC;
-        border-radius: 18px;
-        padding: 8px;
-        transition: all 0.2s ease;
-      }
-      [data-testid="stFileUploader"]:hover {
-        border-color: #E53935;
-        box-shadow: 0 4px 16px rgba(229, 57, 53, 0.08);
-      }
-      [data-testid="stFileUploaderDropzone"] {
-        background: transparent !important;
-        border: none !important;
-        padding: 28px 20px !important;
-      }
-      [data-testid="stFileUploaderDropzone"] button {
-        background: #1F1F1F !important;
-        color: #FFFFFF !important;
-        border: none !important;
-        border-radius: 10px !important;
-        font-weight: 600 !important;
-        padding: 10px 22px !important;
-      }
-      [data-testid="stFileUploaderDropzone"] button:hover {
-        background: #E53935 !important;
-      }
+/* ── 커다란 헤드 타이틀 ── */
+.hero-title {
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -2px;
+  line-height: 1.05;
+  color: #1F1F1F;
+  margin: 0 0 8px 0;
+}
+.hero-title .brand {
+  color: #E53935;
+  letter-spacing: -2.5px;
+}
+.hero-sub {
+  color: #6A6A6A;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.3px;
+  margin: 0 0 32px 0;
+}
 
-      /* ── 탭 라벨 크게 ── */
-      .stTabs {
-        margin-top: 24px;
-      }
-      .stTabs [data-baseweb="tab-list"] {
-        gap: 4px;
-        border-bottom: 1.5px solid #E0E0E0;
-      }
-      .stTabs [data-baseweb="tab"] {
-        font-size: 17px !important;
-        font-weight: 700 !important;
-        letter-spacing: -0.4px;
-        padding: 14px 28px !important;
-        color: #8A8A8A;
-        background: transparent;
-      }
-      .stTabs [data-baseweb="tab"][aria-selected="true"] {
-        color: #E53935 !important;
-      }
-      .stTabs [data-baseweb="tab-highlight"] {
-        background: #E53935 !important;
-        height: 3px !important;
-      }
-      .stTabs [data-baseweb="tab-panel"] {
-        padding-top: 24px;
-      }
+/* ── 파일 업로더 프리미엄 스타일 ── */
+[data-testid="stFileUploader"] {
+  background: #FFFFFF;
+  border: 1.5px dashed #CCCCCC;
+  border-radius: 18px;
+  padding: 8px;
+  transition: all 0.2s ease;
+}
+[data-testid="stFileUploader"]:hover {
+  border-color: #E53935;
+  box-shadow: 0 4px 16px rgba(229, 57, 53, 0.08);
+}
+[data-testid="stFileUploaderDropzone"] {
+  background: transparent !important;
+  border: none !important;
+  padding: 28px 20px !important;
+}
+[data-testid="stFileUploaderDropzone"] button {
+  background: #1F1F1F !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  padding: 10px 22px !important;
+}
+[data-testid="stFileUploaderDropzone"] button:hover {
+  background: #E53935 !important;
+}
 
-      /* 다운로드 버튼도 살짝 고급스럽게 */
-      .stDownloadButton button {
-        border-radius: 10px !important;
-        font-weight: 600 !important;
-        padding: 10px 20px !important;
-      }
-    </style>
-    """, unsafe_allow_html=True)
+/* ── 탭 라벨 크게 ── */
+.stTabs { margin-top: 24px; }
+.stTabs [data-baseweb="tab-list"] {
+  gap: 4px;
+  border-bottom: 1.5px solid #E0E0E0;
+}
+.stTabs [data-baseweb="tab"] {
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.4px;
+  padding: 14px 28px !important;
+  color: #8A8A8A;
+  background: transparent;
+}
+.stTabs [data-baseweb="tab"][aria-selected="true"] {
+  color: #E53935 !important;
+}
+.stTabs [data-baseweb="tab-highlight"] {
+  background: #E53935 !important;
+  height: 3px !important;
+}
+.stTabs [data-baseweb="tab-panel"] { padding-top: 24px; }
+
+/* 다운로드 버튼도 살짝 고급스럽게 */
+.stDownloadButton button {
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  padding: 10px 20px !important;
+}
+</style>""", unsafe_allow_html=True)
 
     registry = load_analyzer_registry()
 
