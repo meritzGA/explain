@@ -748,9 +748,11 @@ button, input, textarea, select {
             results[analyzer["id"]] = build_analyzer_result(pdf_bytes, analyzer["id"])
 
     # ─────────────────────────────────────────────────────────
-    # 큰 Pill Badge 방식 분석기 선택 (탭 대체)
+    # 큰 Pill Badge 방식 분석기 선택 (HTML 링크 방식)
     # ─────────────────────────────────────────────────────────
-    # 각 분석기마다 pill 색상 정의 (id 기준)
+    # st.button은 Streamlit의 내부 DOM을 CSS로 타겟팅해야 해서 불안정하므로
+    # 순수 HTML <a> 링크로 pill을 만들고, ?analyzer=... 쿼리 파라미터로 상태 관리.
+
     pill_styles = {
         "cancer": {
             "bg":       "#F4B088",   # 살구 배경
@@ -764,83 +766,93 @@ button, input, textarea, select {
         },
     }
 
-    # 현재 활성 분석기 결정
-    if "active_analyzer" not in st.session_state:
-        st.session_state.active_analyzer = registry[0]["id"]
-    active_id = st.session_state.active_analyzer
-    if active_id not in {a["id"] for a in registry}:
+    # query_params에서 선택된 분석기 읽기
+    qp = st.query_params
+    qp_analyzer = qp.get("analyzer")
+    valid_ids = {a["id"] for a in registry}
+    if qp_analyzer in valid_ids:
+        active_id = qp_analyzer
+    else:
         active_id = registry[0]["id"]
-        st.session_state.active_analyzer = active_id
 
-    # Pill 스타일 CSS 주입 — 컬럼 위치(nth-child) 기반 타겟팅.
-    # 버튼 바로 앞 row에 컨테이너 marker를 두어, marker 이후 등장하는 column row들만
-    # pill 스타일이 적용되도록 범위를 제한한다. Streamlit에서 stHorizontalBlock이 columns
-    # 컨테이너이므로 `.pill-row-scope + div[data-testid="stHorizontalBlock"]`로 다음 row를 잡는다.
-    pill_css_parts = []
-    for idx, analyzer in enumerate(registry):
+    # Pill HTML 생성
+    pill_html_parts = ['<div class="pill-row">']
+    for analyzer in registry:
         aid = analyzer["id"]
         sty = pill_styles.get(aid, {"bg": "#DDDDDD", "bg_hover": "#CCCCCC", "text": "#333333"})
         is_active = (aid == active_id)
-        nth = idx + 1  # 1-based
-        # `~` (일반 형제) 사용: marker의 모든 후속 형제 중 horizontal block 안의 nth column
-        # `+` 는 바로 다음 형제만 잡지만, Streamlit이 spinner/status 등 중간 요소를 끼워넣는
-        # 경우가 있어 `~`가 더 안전.
-        # :has() 선택자로 pill-row-scope 마커 이후의 첫 stHorizontalBlock의 nth 컬럼 버튼 타겟팅.
-        # :has()는 Chrome 105+ (2022.9), Safari 15.4+ (2022.3), Firefox 121+ (2023.12) 지원.
-        sel_btn_base = (
-            f'.stMarkdown:has(.pill-row-scope) ~ div[data-testid="stHorizontalBlock"] '
-            f'> div[data-testid="column"]:nth-child({nth}) '
-            f'.stButton > button'
-        )
-        pill_css_parts.append(f"""
-/* Pill #{nth} — {aid} */
-{sel_btn_base} {{
-  background: {sty['bg']} !important;
-  color: {sty['text']} !important;
-  border: none !important;
-  border-radius: 22px !important;
-  font-size: 24px !important;
-  font-weight: 900 !important;
-  letter-spacing: -0.8px !important;
-  padding: 22px 16px !important;
-  width: 100% !important;
-  min-height: 96px !important;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.08) !important;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
-  opacity: {1.0 if is_active else 0.55} !important;
-  transform: {"scale(1.0)" if is_active else "scale(0.97)"} !important;
-}}
-{sel_btn_base}:hover {{
-  background: {sty['bg_hover']} !important;
-  color: {sty['text']} !important;
+        pill_html_parts.append(f"""
+<a href="?analyzer={aid}" target="_self" class="pill pill-{aid} {'pill-active' if is_active else 'pill-inactive'}"
+   style="
+     background: {sty['bg']};
+     color: {sty['text']};
+     --pill-hover-bg: {sty['bg_hover']};
+   ">
+  {analyzer['tab_label']}
+</a>""")
+    pill_html_parts.append('</div>')
+    pill_html = ''.join(pill_html_parts)
+
+    # Pill CSS (비교적 단순)
+    st.markdown("""
+<style>
+.pill-row {
+  display: flex;
+  gap: 18px;
+  margin: 24px 0 32px 0;
+  width: 100%;
+}
+.pill {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 96px;
+  padding: 22px 16px;
+  border-radius: 22px;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.8px;
+  text-decoration: none !important;
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+  user-select: none;
+  cursor: pointer;
+}
+.pill-active {
+  opacity: 1.0;
+  transform: scale(1.0);
+}
+.pill-inactive {
+  opacity: 0.55;
+  transform: scale(0.97);
+}
+.pill:hover {
   opacity: 1.0 !important;
   transform: scale(1.0) !important;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.12) !important;
-}}
-{sel_btn_base}:active,
-{sel_btn_base}:focus {{
-  background: {sty['bg']} !important;
-  color: {sty['text']} !important;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.08) !important;
-  outline: none !important;
-}}
-""")
-    pill_css_parts.append("""
-.pill-row-spacer { margin-top: 18px; margin-bottom: 8px; }
-.pill-row-scope { display: none; }
-""")
-    st.markdown(f"<style>{''.join(pill_css_parts)}</style>", unsafe_allow_html=True)
+  box-shadow: 0 6px 18px rgba(0,0,0,0.14) !important;
+  background: var(--pill-hover-bg) !important;
+  text-decoration: none !important;
+}
+.pill:active {
+  transform: scale(0.98) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+}
+/* 모바일 대응 */
+@media (max-width: 640px) {
+  .pill-row { gap: 10px; }
+  .pill {
+    font-size: 18px;
+    min-height: 72px;
+    padding: 14px 10px;
+    border-radius: 18px;
+  }
+}
+</style>
+""", unsafe_allow_html=True)
 
-    # Pill 버튼 렌더링
-    st.markdown('<div class="pill-row-spacer"></div>', unsafe_allow_html=True)
-    # scope marker: 이후 첫 stHorizontalBlock(아래 st.columns)을 CSS가 타겟팅
-    st.markdown('<div class="pill-row-scope"></div>', unsafe_allow_html=True)
-    cols = st.columns(len(registry))
-    for col, analyzer in zip(cols, registry):
-        with col:
-            if st.button(analyzer["tab_label"], key=f"pill_btn_{analyzer['id']}", use_container_width=True):
-                st.session_state.active_analyzer = analyzer["id"]
-                st.rerun()
+    st.markdown(pill_html, unsafe_allow_html=True)
 
     # 선택된 분석기만 렌더링
     active_analyzer = next(a for a in registry if a["id"] == active_id)
