@@ -182,6 +182,201 @@ def _is_noise(line: str) -> bool:
     return any(p.search(line) for p in NOISE_PATTERNS)
 
 
+# ─────────────────────────────────────────────────────────────
+# 가입담보리스트(요약) 형식 전용 파서
+# ─────────────────────────────────────────────────────────────
+# 일반 "가입제안서" 형식과 달리, "요약" 형식은:
+#   - 코드와 담보명이 같은 라인 (예: '7   갱신형 암진단및치료비...')
+#   - ┗ 표식의 서브 담보는 납기/만기 라인이 없음
+#   - 담보명이 길면 2줄로 split됨 (괄호 내부에서 끊김)
+#   - '세부보장 참조'인 상위 담보는 서브 담보의 합이므로 skip
+
+# 코드+이름 라인: 시작에 optional ' ┗ ', 그 다음 숫자(1~4자리), 공백 2칸 이상, 이름
+CODE_NAME_LINE_RE = re.compile(r'^(\s*┗\s*)?(\d{1,4})\s{2,}(.+)$')
+# 가입금액 라인 (요약 포맷 버전): '세부보장'도 허용 (그 다음 줄에 '참조')
+AMOUNT_OR_REF_LINE_RE = re.compile(
+    r'^(?:\d+(?:억|천만|백만|만)원|[\d,]+원|안내참조|세부보장\s*참조|세부보장)$'
+)
+# 납기/만기 라인: '20년 / 20년', '10년 / 10년', '3년 / 3년'
+PERIOD_LINE_RE = re.compile(r'^\d+년\s*/\s*\d+년$')
+
+
+# 요약 포맷 전용 노이즈 패턴 (페이지 헤더 등)
+SUMMARY_NOISE_PATTERNS = NOISE_PATTERNS + [
+    re.compile(r'^\[고객용\]'),
+    re.compile(r'^\(무\).*메리츠'),
+    re.compile(r'^계약사항\s*:'),
+    re.compile(r'^보장보험료$'),
+    re.compile(r'^적립보험료$'),
+    re.compile(r'^할인보험료$'),
+    re.compile(r'^\d회차'),
+    re.compile(r'^1회차보험료'),
+    re.compile(r'^2회차이후보험료'),
+    re.compile(r'^0\s*원$'),
+    re.compile(r'^설계번호\s*:'),
+    re.compile(r'^보험료사항$'),
+    re.compile(r'^가입담보리스트$'),
+]
+
+
+def _is_summary_noise(line: str) -> bool:
+    if not line:
+        return True
+    return any(p.search(line) for p in SUMMARY_NOISE_PATTERNS)
+
+
+def _is_summary_format(pages_text: list[str]) -> bool:
+    """첫 페이지에 '[고객용]가입담보리스트(요약)'이 있으면 요약 포맷."""
+    if not pages_text:
+        return False
+    first = pages_text[0]
+    return '가입담보리스트(요약)' in first or '[고객용]가입담보리스트' in first
+
+
+def _parse_coverages_summary(pages_text: list[str]) -> list[Coverage]:
+    """
+    '[고객용]가입담보리스트(요약)' 형식 전용 파서.
+
+    각 담보는 다음 구조:
+        [┗] <코드>   <이름>                            ← 1~2줄
+        <가입금액>
+        <보험료>
+        [납기/만기]                                    ← 서브담보는 생략 가능
+        [갱신종료]                                     ← 서브담보는 생략 가능
+    """
+    # 모든 페이지 라인을 한 리스트로 평탄화
+    all_lines: list[str] = []
+    for pg in pages_text:
+        for line in pg.split('\n'):
+            all_lines.append(line.strip())
+
+    coverages: list[Coverage] = []
+    current_category: Optional[str] = None
+
+    # 종료 마커
+    end_markers = ['주의사항', '가입담보리스트는']
+
+    i = 0
+    while i < len(all_lines):
+        line = all_lines[i]
+
+        # 종료 체크
+        if any(mk in line for mk in end_markers):
+            break
+
+        if _is_summary_noise(line):
+            i += 1
+            continue
+
+        # 카테고리 라인 감지
+        if line in CATEGORY_WORDS or line.rstrip('/') in CATEGORY_WORDS:
+            current_category = line.rstrip('/')
+            i += 1
+            continue
+        if '/' in line and all(p.strip() in CATEGORY_WORDS for p in line.split('/')):
+            current_category = line
+            i += 1
+            continue
+
+        # 코드+이름 라인 감지
+        m = CODE_NAME_LINE_RE.match(line)
+        if not m:
+            i += 1
+            continue
+
+        sub_prefix = m.group(1)  # ' ┗ ' 여부
+        code = m.group(2)
+        name_part1 = m.group(3).strip()
+        is_sub = sub_prefix is not None
+
+        # 보험료자동납입특약(620 등) 같은 금액 없는 특약은 skip
+        if '보험료자동납입특약' in name_part1:
+            i += 1
+            continue
+
+        # 다음 라인이 가입금액인지 보기. 만약 아니면 이름의 연속 라인으로 봄.
+        name_parts = [name_part1]
+        j = i + 1
+        # 이름 연속 라인 처리: 다음 라인이 AMOUNT_OR_REF가 아니고
+        # 새 코드+이름 라인도 아니고 카테고리도 아닐 때 이름의 연속으로 간주
+        while j < len(all_lines):
+            nxt = all_lines[j]
+            if _is_summary_noise(nxt):
+                j += 1
+                continue
+            if AMOUNT_OR_REF_LINE_RE.match(nxt):
+                break
+            if CODE_NAME_LINE_RE.match(nxt):
+                # 다음 코드 라인이 먼저 나오면 이 담보는 금액이 없는 것 → skip
+                break
+            if nxt in CATEGORY_WORDS or nxt.rstrip('/') in CATEGORY_WORDS:
+                break
+            # 이름 연속 라인
+            name_parts.append(nxt)
+            j += 1
+
+        # j가 가입금액 라인을 가리키지 않으면 skip
+        if j >= len(all_lines) or not AMOUNT_OR_REF_LINE_RE.match(all_lines[j]):
+            i += 1
+            continue
+
+        name = ''.join(name_parts).strip()
+        # 이름 후처리
+        name = re.sub(r'\s+', ' ', name)
+        name = name.replace('( ', '(').replace(' )', ')')
+        # ┗ 표식이면 이름 앞에 표기 (박시연 PDF와 동일하게)
+        if is_sub:
+            name = '┗ ' + name
+
+        amount_str = all_lines[j]
+        # '세부보장' 다음 줄이 '참조'일 수 있음
+        if amount_str == '세부보장' and j + 1 < len(all_lines) and all_lines[j + 1].strip() == '참조':
+            amount_str = '세부보장 참조'
+            j += 1
+        amount = parse_korean_amount(amount_str)
+
+        # 보험료 라인 (다음 non-noise 라인)
+        k = j + 1
+        premium = 0
+        while k < len(all_lines):
+            lk = all_lines[k]
+            if _is_summary_noise(lk):
+                k += 1
+                continue
+            if PREMIUM_LINE_RE.match(lk):
+                premium = int(lk.replace(',', ''))
+                k += 1
+                break
+            # 보험료 없이 바로 다음 담보가 올 수도 있음 (매우 드문 케이스)
+            break
+
+        # 납기/만기, 갱신종료 라인을 skip (있으면)
+        while k < len(all_lines):
+            lk = all_lines[k]
+            if PERIOD_LINE_RE.match(lk) or lk.startswith('갱신종료'):
+                k += 1
+                continue
+            break
+
+        # "세부보장 참조" 상위 담보 (그룹 헤더)는 skip.
+        # 바로 뒤이어 나오는 서브 담보들만 실제 등록되도록 함.
+        if amount_str in ('세부보장 참조', '세부보장참조'):
+            i = k
+            continue
+
+        coverages.append(Coverage(
+            code=code,
+            name=name,
+            category=current_category or "기타",
+            amount=amount,
+            amount_display=amount_str,
+            premium=premium,
+        ))
+        i = k
+
+    return coverages
+
+
 def _parse_coverages(pages_text: list[str]) -> list[Coverage]:
     """
     모든 페이지 텍스트에서 담보 블록을 찾아 Coverage 리스트로 반환.
@@ -328,9 +523,20 @@ def _parse_customer(pages_text: list[str]) -> Customer:
 
     # fallback: 피보험자 이름만이라도 (가입제안서 첫 페이지)
     if not name:
+        # 요약 포맷: '[피보험자 : 이유상]'
+        m = re.search(r'\[피보험자\s*:\s*([^\]]+?)\s*\]', full)
+        if m:
+            name = m.group(1).strip()
+    if not name:
         m = re.search(r'피보험자\s*\n?([^\n(|]+?)(?:\(|\n)', full)
         if m:
             name = m.group(1).strip()
+
+    # 최종 안전장치: name에 남은 콜론/대괄호 제거
+    if name:
+        name = name.strip(' :[]').strip()
+        if not name:
+            name = None
 
     return Customer(
         name=name or "고객",
@@ -409,10 +615,15 @@ def _parse_policy(pages_text: list[str]) -> Policy:
 
 def extract(pdf_bytes: bytes) -> ExtractedData:
     pages_text = _read_all_text(pdf_bytes)
+    # 포맷 감지: "가입담보리스트(요약)" 형식이면 전용 파서 사용
+    if _is_summary_format(pages_text):
+        coverages = _parse_coverages_summary(pages_text)
+    else:
+        coverages = _parse_coverages(pages_text)
     return ExtractedData(
         customer=_parse_customer(pages_text),
         policy=_parse_policy(pages_text),
-        coverages=_parse_coverages(pages_text),
+        coverages=coverages,
     )
 
 
