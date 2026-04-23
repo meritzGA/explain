@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ customer.name }} 고객 암 보장 분석</title>
+<title>{{ customer.name }} 고객 {{ report_label|default('암 보장') }} 분석</title>
 
 <!-- ── Pretendard 폰트 (가변 폰트, 한글 동적 서브셋) ── -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -375,10 +375,10 @@ button, input, select, textarea { font-family: var(--font-sans); }
     <div class="mery-body">
       <div class="mery-tagline">
         <span class="shield-small"></span>
-        <span>가입제안서 기반 <strong>암 치료비</strong> 간편 분석 리포트</span>
+        <span>가입제안서 기반 <strong>{{ report_label|default('암 치료비') }}</strong> 간편 분석 리포트</span>
       </div>
       <div class="mery-kicker">
-        <span class="name">{{ customer.name }}</span>님의 <span class="red">암 치료비</span> 보장금액은 5년 기준 최대
+        <span class="name">{{ customer.name }}</span>님의 <span class="red">{{ report_label|default('암 치료비') }}</span> 보장금액은 5년 기준 최대
       </div>
       <div class="mery-amount">
         {{ headline.five_year_min_display }} ~ {{ headline.five_year_max_display }}<span class="suffix">으로 산출됩니다.</span>
