@@ -179,6 +179,10 @@ class FiveYearHeadline:
     five_year_min_display: str
     five_year_max_display: str
     kicker: str
+    # min == max (= 감액 없음)일 때 템플릿이 단일 금액으로 표시할 수 있도록 힌트 제공.
+    # 기존 필드는 그대로 두므로 암 분석기는 영향받지 않음.
+    annual_is_range: bool = True
+    five_year_is_range: bool = True
 
 
 def build_headline(
@@ -205,6 +209,8 @@ def build_headline(
         five_year_min_display=_format_man(five_year_min),
         five_year_max_display=_format_man(five_year_max),
         kicker=kicker,
+        annual_is_range=(annual_min != annual_max),
+        five_year_is_range=(five_year_min != five_year_max),
     )
 
 

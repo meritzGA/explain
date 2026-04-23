@@ -371,6 +371,8 @@ def build_analyzer_result(pdf_bytes: bytes, analyzer_id: str) -> dict:
         "report_label": analyzer.get("report_label")
                         or treatments_config.get("report_title_prefix")
                         or "치료비",
+        # 감액 구조(1년 미경과시 50%)가 있는지. 2대담보는 false → min/max 단일 표기 + 안내문구 숨김
+        "has_deduction": treatments_config.get("has_deduction", True),
         "analyzer_id": analyzer_id,
         "tab_label": analyzer["tab_label"],
     }
@@ -450,33 +452,130 @@ def main():
         initial_sidebar_state="collapsed",
     )
 
-    # Streamlit 기본 여백 최소화 + 깔끔한 배경
+    # ── Pretendard 폰트를 Streamlit 메인 프레임에도 강제 주입 + 프리미엄 스타일 ──
     st.markdown("""
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="stylesheet" as="style" crossorigin
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
     <style>
-      .block-container { padding-top: 1.5rem; padding-bottom: 2rem; max-width: 1240px; }
-      [data-testid="stHeader"] { background: transparent; }
+      /* ── Pretendard를 Streamlit 전역에 강제 적용 ── */
+      html, body, [class*="css"], .stApp, .stApp *,
+      .stMarkdown, .stMarkdown *, [data-testid="stMarkdownContainer"] *,
+      [data-testid="stFileUploader"] *, [data-testid="stTabs"] *,
+      button, input, textarea, select {
+        font-family: 'Pretendard Variable', Pretendard,
+                     -apple-system, BlinkMacSystemFont, system-ui,
+                     'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR',
+                     'Malgun Gothic', sans-serif !important;
+        font-feature-settings: 'tnum' on, 'ss03' on;
+      }
+
+      /* 배경과 여백 */
       .stApp { background: #EEEEEE; }
-      h1, h2 { font-weight: 700 !important; }
-      /* 탭 라벨 크게 */
+      [data-testid="stHeader"] { background: transparent; }
+      .block-container {
+        padding-top: 2.5rem;
+        padding-bottom: 2rem;
+        max-width: 1240px;
+      }
+
+      /* ── 커다란 헤드 타이틀 ── */
+      .hero-title {
+        font-size: 56px;
+        font-weight: 800;
+        letter-spacing: -2px;
+        line-height: 1.05;
+        color: #1F1F1F;
+        margin: 0 0 8px 0;
+      }
+      .hero-title .brand {
+        color: #E53935;
+        letter-spacing: -2.5px;
+      }
+      .hero-sub {
+        color: #6A6A6A;
+        font-size: 16px;
+        font-weight: 500;
+        letter-spacing: -0.3px;
+        margin: 0 0 32px 0;
+      }
+
+      /* ── 파일 업로더 프리미엄 스타일 ── */
+      [data-testid="stFileUploader"] {
+        background: #FFFFFF;
+        border: 1.5px dashed #CCCCCC;
+        border-radius: 18px;
+        padding: 8px;
+        transition: all 0.2s ease;
+      }
+      [data-testid="stFileUploader"]:hover {
+        border-color: #E53935;
+        box-shadow: 0 4px 16px rgba(229, 57, 53, 0.08);
+      }
+      [data-testid="stFileUploaderDropzone"] {
+        background: transparent !important;
+        border: none !important;
+        padding: 28px 20px !important;
+      }
+      [data-testid="stFileUploaderDropzone"] button {
+        background: #1F1F1F !important;
+        color: #FFFFFF !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        padding: 10px 22px !important;
+      }
+      [data-testid="stFileUploaderDropzone"] button:hover {
+        background: #E53935 !important;
+      }
+
+      /* ── 탭 라벨 크게 ── */
+      .stTabs {
+        margin-top: 24px;
+      }
+      .stTabs [data-baseweb="tab-list"] {
+        gap: 4px;
+        border-bottom: 1.5px solid #E0E0E0;
+      }
       .stTabs [data-baseweb="tab"] {
-        font-size: 15px;
-        font-weight: 600;
-        padding: 8px 20px;
+        font-size: 17px !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.4px;
+        padding: 14px 28px !important;
+        color: #8A8A8A;
+        background: transparent;
       }
       .stTabs [data-baseweb="tab"][aria-selected="true"] {
-        color: #E53935;
+        color: #E53935 !important;
+      }
+      .stTabs [data-baseweb="tab-highlight"] {
+        background: #E53935 !important;
+        height: 3px !important;
+      }
+      .stTabs [data-baseweb="tab-panel"] {
+        padding-top: 24px;
+      }
+
+      /* 다운로드 버튼도 살짝 고급스럽게 */
+      .stDownloadButton button {
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        padding: 10px 20px !important;
       }
     </style>
     """, unsafe_allow_html=True)
 
     registry = load_analyzer_registry()
 
+    # ── 시원시원한 헤드 타이틀 ──
     st.markdown(
-        "<h1 style='font-size: 26px; margin-bottom: 4px;'>"
-        "<span style='color: #E53935;'>메리츠</span> 보장 분석기</h1>"
-        "<p style='color: #6A6A6A; font-size: 14px; margin-bottom: 24px;'>"
-        "가입제안서 PDF를 한 번 업로드하시면 암 · 2대담보를 탭으로 나눠 분석해 드립니다.</p>",
-        unsafe_allow_html=True
+        '<div class="hero-title">'
+        '<span class="brand">메리츠</span> 보장 분석기'
+        '</div>'
+        '<div class="hero-sub">'
+        '가입제안서 PDF 하나로 <strong>암 · 2대담보</strong>를 한 번에 분석합니다.'
+        '</div>',
+        unsafe_allow_html=True,
     )
 
     uploaded = st.file_uploader(
@@ -486,10 +585,7 @@ def main():
     )
 
     if not uploaded:
-        # 탭 라벨만 미리 보여주기
-        tab_labels = " · ".join(a["tab_label"] for a in registry)
-        st.info(f"PDF를 업로드하시면 [{tab_labels}] 탭으로 자동 분석됩니다.")
-        return
+        return  # info 박스 없이 업로더만 깔끔하게 보여주고 끝
 
     pdf_bytes = uploaded.read()
 
