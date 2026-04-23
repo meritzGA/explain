@@ -355,6 +355,7 @@ def build_analyzer_result(pdf_bytes: bytes, analyzer_id: str) -> dict:
             "subtotal_min": card.subtotal_min,
             "subtotal_max": card.subtotal_max,
             "subtotal_display": card.subtotal_display,
+            "recurring": card.recurring,
             "groups": groups,
         })
 
@@ -407,27 +408,30 @@ def _render_analyzer_tab(result: dict, pdf_bytes: bytes, source_filename: str):
         )
     st.components.v1.html(html, height=2200, scrolling=True)
 
-    # 검수 영역 (접혀있음) — 탭별 key 부여
-    with st.expander("파싱 결과 원본 보기 (검수용)"):
-        inner_tab1, inner_tab2 = st.tabs(["담보 전체", "치료 카드 매핑"])
-        with inner_tab1:
-            st.dataframe(
-                result["coverages_all"],
-                use_container_width=True,
-                hide_index=True,
-            )
-        with inner_tab2:
-            pt = result.get("product_type") or "매칭된 상품 타입 없음"
-            st.caption(f"상품 타입: {pt}")
-            if not result.get("treatment_cards"):
-                st.warning("치료 카드가 생성되지 않았습니다.")
-            for card in result.get("treatment_cards", []):
-                with st.container(border=True):
-                    st.markdown(f"**{card['label']}** — {card['subtotal_display'].replace(chr(10), ' ')}")
-                    for g in card["groups"]:
-                        st.caption(f"• {g['coverage_name_short']}")
-                        for it in g["item_list"]:
-                            st.caption(f"    ┗ {it['label']}: {it['display']}")
+    # 검수 영역 (접혀있음) — 어떤 담보가 어떤 카드에 붙었는지 투명하게 표시
+    with st.expander(f"📋 파싱 결과 상세 보기 ({report_label} 매칭 검수)"):
+        pt = result.get("product_type") or "매칭된 상품 타입 없음"
+        st.caption(f"상품 타입: **{pt}**")
+
+        # "담보 → 어느 카드로 들어갔는지" 매핑 테이블 구성
+        cov_to_card: dict[str, list[str]] = {}
+        for card in result.get("treatment_cards", []):
+            for g in card["groups"]:
+                cov_name = g["coverage_name"]
+                cov_to_card.setdefault(cov_name, []).append(card["label"])
+
+        rows = []
+        for cov in result["coverages_all"]:
+            matched_cards = cov_to_card.get(cov["name"], [])
+            rows.append({
+                "코드": cov.get("code", ""),
+                "담보명": cov["name"],
+                "가입금액": cov.get("amount_display", ""),
+                "카드 매칭": " / ".join(matched_cards) if matched_cards else "—",
+            })
+        st.dataframe(rows, use_container_width=True, hide_index=True)
+
+        st.caption("💡 '카드 매칭'이 '—'인 담보는 현재 분석기가 해당 담보를 해당 탭에서 처리하지 않는 경우입니다.")
 
 
 # ─────────────────────────────────────────────────────────────
