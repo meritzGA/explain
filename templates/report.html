@@ -381,11 +381,17 @@ button, input, select, textarea { font-family: var(--font-sans); }
         <span class="name">{{ customer.name }}</span>님의 <span class="red">{{ report_label|default('암 치료비') }}</span> 보장금액은 5년 기준 최대
       </div>
       <div class="mery-amount">
+        {% if headline.five_year_is_range %}
         {{ headline.five_year_min_display }} ~ {{ headline.five_year_max_display }}<span class="suffix">으로 산출됩니다.</span>
+        {% else %}
+        {{ headline.five_year_max_display }}<span class="suffix">으로 산출됩니다.</span>
+        {% endif %}
       </div>
       <div class="mery-disclaimer">
-        * 아래 담보별 보장금액을 단순 합산하여 5년을 곱한 참고용 수치입니다. 실제 보장금액과 다를 수 있습니다.<br>
+        * 아래 담보별 보장금액을 단순 합산하여 5년을 곱한 참고용 수치입니다. 실제 보장금액과 다를 수 있습니다.
+        {% if has_deduction %}<br>
         * 금액 표기 중 <strong>괄호 안 금액</strong>은 계약일부터 1년 경과 전 감액 적용 시 지급액입니다.
+        {% endif %}
       </div>
     </div>
   </div>
@@ -402,7 +408,11 @@ button, input, select, textarea { font-family: var(--font-sans); }
       <span>담보별 보장금액 단순 합계 (연간)</span>
     </div>
     <div class="total-bar-right">
+      {% if headline.annual_is_range %}
       {{ headline.annual_min_display }} ~{{ headline.annual_max_display }}
+      {% else %}
+      {{ headline.annual_max_display }}
+      {% endif %}
     </div>
   </div>
 
@@ -438,7 +448,9 @@ button, input, select, textarea { font-family: var(--font-sans); }
 
   <!-- ── 하단 disclaimer (캡처에 포함) ── -->
   <div class="disclaimer">
+    {% if has_deduction %}
     * 담보금액이 <strong>3,000만(1,500만)</strong> 형태로 표기된 항목은 계약일부터 1년 경과 전 감액 기간에는 괄호 안 금액이 지급됩니다.<br>
+    {% endif %}
     * 본 분석은 가입제안서의 담보 내역을 단순 계산한 참고자료이며, 실제 보장금액과 다를 수 있습니다. 정확한 내용은 가입제안서를 확인해주세요.
   </div>
 
