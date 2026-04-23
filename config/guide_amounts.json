@@ -1,0 +1,362 @@
+{
+  "_meta": {
+    "description": "메리츠 설명가이드(비통치/암통치/순통치)의 가입금액 tier별 세부 항목 금액 매트릭스. 가이드 원본은 GA260210/GA260219/GA260211.",
+    "amount_unit": "만원",
+    "last_updated": "2026-04-23",
+    "source_pdfs": [
+      "GA260210_비통치_설명가이드(최종심의완료).pdf (2026.02.09)",
+      "GA260211_순통치_설명가이드(최종심의완료).pdf (2026.02.10)",
+      "GA260219_암통치_설명가이드(최종심의완료).pdf (2026.02.19)"
+    ]
+  },
+
+  "bitonchi_premium": {
+    "label": "비통치 고급형",
+    "product_name": "암 통합치료비Ⅱ(비급여(전액본인부담 포함))",
+    "match_patterns": [
+      "암\\s*통합치료비\\s*Ⅱ.*비급여.*전액본인부담",
+      "암\\s*통합치료비2.*비급여.*전액본인부담",
+      "통합치료비Ⅱ\\(비급여"
+    ],
+    "subtotal_mode": "tier_cap",
+    "tier_caps_man": [10000, 7000, 4000],
+    "tiers": {
+      "10000": {
+        "surgery_cancer_per_time":        1000,
+        "surgery_pseudo_per_time":         200,
+        "radiation_cancer":               1000,
+        "radiation_skin_thyroid":          200,
+        "chemo_cancer":                   1000,
+        "chemo_skin_thyroid":              200,
+        "davinci_cancer":                 2000,
+        "davinci_specific_cancer":        1200,
+        "targeted":                       4000,
+        "immune":                         7000,
+        "proton":                         4000
+      },
+      "7000": {
+        "surgery_cancer_per_time":         750,
+        "surgery_pseudo_per_time":         150,
+        "radiation_cancer":                750,
+        "radiation_skin_thyroid":          150,
+        "chemo_cancer":                    750,
+        "chemo_skin_thyroid":              150,
+        "davinci_cancer":                 1500,
+        "davinci_specific_cancer":         900,
+        "targeted":                       2750,
+        "immune":                         4750,
+        "proton":                         2750
+      },
+      "4000": {
+        "surgery_cancer_per_time":         500,
+        "surgery_pseudo_per_time":         100,
+        "radiation_cancer":                500,
+        "radiation_skin_thyroid":          100,
+        "chemo_cancer":                    500,
+        "chemo_skin_thyroid":              100,
+        "davinci_cancer":                 1000,
+        "davinci_specific_cancer":         600,
+        "targeted":                       1500,
+        "immune":                         2500,
+        "proton":                         1500
+      }
+    }
+  },
+
+  "bitonchi_main_only": {
+    "label": "비통치 주요치료형",
+    "product_name": "암 통합치료비(주요치료)(비급여(전액본인부담 포함))",
+    "match_patterns": [
+      "암\\s*통합치료비\\(주요치료\\).*비급여",
+      "통합치료비\\(주요치료\\)\\(비급여"
+    ],
+    "subtotal_mode": "tier_cap",
+    "tier_caps_man": [7000, 5000, 2000],
+    "tiers": {
+      "7000": {
+        "surgery_cancer_per_time":        1000,
+        "surgery_pseudo_per_time":         200,
+        "radiation_cancer":               1000,
+        "radiation_skin_thyroid":          200,
+        "chemo_cancer":                   1000,
+        "chemo_skin_thyroid":              200,
+        "targeted":                       6000,
+        "immune":                         3000,
+        "proton":                         3000
+      },
+      "5000": {
+        "surgery_cancer_per_time":         750,
+        "surgery_pseudo_per_time":         150,
+        "radiation_cancer":                750,
+        "radiation_skin_thyroid":          150,
+        "chemo_cancer":                    750,
+        "chemo_skin_thyroid":              150,
+        "targeted":                       4000,
+        "immune":                         2000,
+        "proton":                         2000
+      },
+      "2000": {
+        "surgery_cancer_per_time":         500,
+        "surgery_pseudo_per_time":         100,
+        "radiation_cancer":                500,
+        "radiation_skin_thyroid":          100,
+        "chemo_cancer":                    500,
+        "chemo_skin_thyroid":              100,
+        "targeted":                       2000,
+        "immune":                         1000,
+        "proton":                         1000
+      }
+    }
+  },
+
+  "amtonchi_basic": {
+    "label": "암통치 기본형",
+    "product_name": "암 통합치료비(기본형)",
+    "match_patterns": [
+      "암\\s*통합치료비\\(기본형\\)",
+      "통합치료비\\s*\\(기본형"
+    ],
+    "subtotal_mode": "tier_cap",
+    "tier_caps_man": [10000, 8000, 4000],
+    "tiers": {
+      "10000": {
+        "exam_endoscopy":                    5,
+        "exam_mri":                          5,
+        "exam_pet":                          5,
+        "exam_single_gene":                  5,
+        "exam_ultrasound":                  10,
+        "exam_ct":                          10,
+        "exam_biopsy":                      20,
+        "exam_ngs_panel":                  100,
+        "surgery_cancer_per_time":        1000,
+        "surgery_pseudo_per_time":         200,
+        "radiation_cancer":               1000,
+        "radiation_skin_thyroid":          200,
+        "chemo_cancer":                   1000,
+        "chemo_skin_thyroid":              200,
+        "imrt":                           1000,
+        "pain_relief":                      50,
+        "davinci_cancer":                 2000,
+        "davinci_specific_cancer":        1200,
+        "targeted":                       4000,
+        "immune":                         7000,
+        "proton":                         4000,
+        "rehab_in_per_day":                  2,
+        "rehab_out_per_day":                 2
+      },
+      "8000": {
+        "exam_endoscopy":                    5,
+        "exam_mri":                          5,
+        "exam_pet":                          5,
+        "exam_single_gene":                  5,
+        "exam_ultrasound":                  10,
+        "exam_ct":                          10,
+        "exam_biopsy":                      20,
+        "exam_ngs_panel":                  100,
+        "surgery_cancer_per_time":         750,
+        "surgery_pseudo_per_time":         150,
+        "radiation_cancer":                750,
+        "radiation_skin_thyroid":          150,
+        "chemo_cancer":                    750,
+        "chemo_skin_thyroid":              150,
+        "imrt":                            750,
+        "pain_relief":                      40,
+        "davinci_cancer":                 1500,
+        "davinci_specific_cancer":         900,
+        "targeted":                       2750,
+        "immune":                         4750,
+        "proton":                         2750,
+        "rehab_in_per_day":                  2,
+        "rehab_out_per_day":                 2
+      },
+      "4000": {
+        "exam_endoscopy":                    5,
+        "exam_mri":                          5,
+        "exam_pet":                          5,
+        "exam_single_gene":                  5,
+        "exam_ultrasound":                   5,
+        "exam_ct":                           5,
+        "exam_biopsy":                      10,
+        "exam_ngs_panel":                  100,
+        "surgery_cancer_per_time":         500,
+        "surgery_pseudo_per_time":         100,
+        "radiation_cancer":                500,
+        "radiation_skin_thyroid":          100,
+        "chemo_cancer":                    500,
+        "chemo_skin_thyroid":              100,
+        "imrt":                            500,
+        "pain_relief":                      30,
+        "davinci_cancer":                 1000,
+        "davinci_specific_cancer":         600,
+        "targeted":                       1500,
+        "immune":                         2500,
+        "proton":                         1500,
+        "rehab_in_per_day":                  2,
+        "rehab_out_per_day":                 2
+      }
+    }
+  },
+
+  "amtonchi_economy": {
+    "label": "암통치 실속형",
+    "product_name": "암 통합치료비(실속형)",
+    "match_patterns": [
+      "암\\s*통합치료비\\(실속형\\)",
+      "통합치료비\\s*\\(실속형"
+    ],
+    "subtotal_mode": "tier_cap",
+    "tier_caps_man": [7000, 5000, 3000, 1000],
+    "tiers": {
+      "7000": {
+        "surgery_cancer_per_time":        1000,
+        "surgery_pseudo_per_time":         200,
+        "radiation_cancer":               1000,
+        "radiation_skin_thyroid":          200,
+        "chemo_cancer":                   1000,
+        "chemo_skin_thyroid":              200,
+        "targeted":                       2000,
+        "immune":                         3000,
+        "proton":                         2000
+      },
+      "5000": {
+        "surgery_cancer_per_time":         750,
+        "surgery_pseudo_per_time":         150,
+        "radiation_cancer":                750,
+        "radiation_skin_thyroid":          150,
+        "chemo_cancer":                    750,
+        "chemo_skin_thyroid":              150,
+        "targeted":                       1500,
+        "immune":                         2250,
+        "proton":                         1500
+      },
+      "3000": {
+        "surgery_cancer_per_time":         500,
+        "surgery_pseudo_per_time":         100,
+        "radiation_cancer":                500,
+        "radiation_skin_thyroid":          100,
+        "chemo_cancer":                    500,
+        "chemo_skin_thyroid":              100,
+        "targeted":                       1000,
+        "immune":                         1500,
+        "proton":                         1000
+      },
+      "1000": {
+        "surgery_cancer_per_time":         250,
+        "surgery_pseudo_per_time":          50,
+        "radiation_cancer":                250,
+        "radiation_skin_thyroid":           50,
+        "chemo_cancer":                    250,
+        "chemo_skin_thyroid":               50,
+        "targeted":                        500,
+        "immune":                          750,
+        "proton":                          500
+      }
+    }
+  },
+
+  "suntonchi": {
+    "label": "순통치 (특정순환계질환 통합치료비)",
+    "product_name": "특정순환계질환 통합치료비",
+    "match_patterns": [
+      "특정순환계질환\\s*통합치료비",
+      "특정\\s*순환계\\s*통합치료비"
+    ],
+    "exclude_if_name_contains": ["생활비"],
+    "subtotal_mode": "tier_cap",
+    "tier_caps_man": [10000, 8000, 5000, 3000, 2000],
+    "tiers": {
+      "10000": {
+        "exam_mri":                         5,
+        "exam_pet":                         5,
+        "exam_ct":                         10,
+        "surgery_per_time":              2000,
+        "icu":                           2000,
+        "thrombolysis":                  2500,
+        "crrt":                           500,
+        "ventilator":                     200,
+        "hypothermia":                    100,
+        "ecmo":                          2000,
+        "rehab_in_per_day":                 2,
+        "rehab_out_per_day":                2
+      },
+      "8000": {
+        "exam_mri":                         5,
+        "exam_pet":                         5,
+        "exam_ct":                         10,
+        "surgery_per_time":              2000,
+        "icu":                           2000,
+        "thrombolysis":                  2000,
+        "crrt":                           500,
+        "ventilator":                     200,
+        "hypothermia":                    100,
+        "ecmo":                          2000,
+        "rehab_in_per_day":                 2,
+        "rehab_out_per_day":                2
+      },
+      "5000": {
+        "exam_mri":                         5,
+        "exam_pet":                         5,
+        "exam_ct":                         10,
+        "surgery_per_time":              1000,
+        "icu":                           1000,
+        "thrombolysis":                  1000,
+        "crrt":                           500,
+        "ventilator":                     200,
+        "hypothermia":                    100,
+        "ecmo":                          2000,
+        "rehab_in_per_day":                 2,
+        "rehab_out_per_day":                2
+      },
+      "3000": {
+        "exam_mri":                         5,
+        "exam_pet":                         5,
+        "exam_ct":                         10,
+        "surgery_per_time":               700,
+        "icu":                            700,
+        "thrombolysis":                   700,
+        "crrt":                           300,
+        "ventilator":                     100,
+        "hypothermia":                     50,
+        "ecmo":                          1000,
+        "rehab_in_per_day":                 2,
+        "rehab_out_per_day":                2
+      },
+      "2000": {
+        "exam_mri":                         5,
+        "exam_pet":                         5,
+        "exam_ct":                         10,
+        "surgery_per_time":               400,
+        "icu":                            400,
+        "thrombolysis":                   400,
+        "crrt":                           200,
+        "ventilator":                     100,
+        "hypothermia":                     50,
+        "ecmo":                           500,
+        "rehab_in_per_day":                 2,
+        "rehab_out_per_day":                2
+      }
+    }
+  },
+
+  "cancer_integrated_III": {
+    "label": "암 통합치료비Ⅲ (표적/양성자 추가 보장)",
+    "product_name": "암진단및치료비[암 통합치료비Ⅲ(비급여(전액본인부담 포함))]",
+    "match_patterns": [
+      "암\\s*통합치료비\\s*Ⅲ",
+      "통합치료비Ⅲ",
+      "암진단및치료비.*통합치료비Ⅲ"
+    ],
+    "integration_mode": "add_to_targeted_and_proton",
+    "_note": "가입금액 전액이 표적항암 or 양성자 치료 시 추가 지급. 연간 치료횟수 2회 달성 시 가입금액 100% 보장. 비통치Ⅱ/기본형과 중복 지급 가능(별개 담보).",
+    "payout_rule": {
+      "2nd_year_plus": {
+        "first_treatment":  "cap - 3000",
+        "second_treatment": "3000"
+      },
+      "1st_year": {
+        "first_treatment":  "(cap - 3000) / 2",
+        "second_treatment": "1500"
+      }
+    }
+  }
+}

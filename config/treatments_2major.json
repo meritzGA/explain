@@ -48,6 +48,8 @@
         "label": "뇌혈관질환 진단비",
         "icon": "ribbon",
         "color_text": "#3C3489",
+        "recurring": false,
+        "_comment": "최초 1회한 지급 — 5년 헤드라인 계산시 × 5 적용 안 됨",
         "contributions": [
           {
             "match_coverage": "뇌혈관질환진단비",
@@ -128,6 +130,8 @@
         "label": "허혈성심장질환 진단비",
         "icon": "ribbon",
         "color_text": "#A32D2D",
+        "recurring": false,
+        "_comment": "최초 1회한 지급 — 5년 헤드라인 계산시 × 5 적용 안 됨",
         "contributions": [
           {
             "match_coverage": "허혈성심장질환진단비",
@@ -234,7 +238,7 @@
         "subtotal_mode": "coverage_cap",
         "contributions": [
           {
-            "match_coverage": "특정순환계질환.*통합치료비|특정순환계.*통합치료",
+            "match_coverage": "^특정순환계질환\\s*통합치료비\\(",
             "items": [
               { "label": "(연1회) 부분체외순환치료", "amount": 2000, "display": "2,000만원" },
               { "label": "(수술 1회당) 수술", "amount": 1000, "display": "1,000만원" },
