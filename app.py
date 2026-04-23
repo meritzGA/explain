@@ -389,7 +389,7 @@ def render_html(processed: dict) -> str:
 # ─────────────────────────────────────────────────────────────
 
 def _render_analyzer_tab(result: dict, pdf_bytes: bytes, source_filename: str):
-    """한 분석기의 결과를 렌더링. 다운로드 버튼 + 인라인 HTML + 검수 expander."""
+    """한 분석기의 결과를 렌더링. 인라인 HTML + 검수 expander."""
     # 파일 정보 주입
     result = dict(result)  # 캐시 내용 오염 방지 복사
     result["source_filename"] = source_filename
@@ -397,18 +397,7 @@ def _render_analyzer_tab(result: dict, pdf_bytes: bytes, source_filename: str):
     result["source_filesize"] = f"{kb:,.1f} KB"
     html = render_html(result)
 
-    customer_name = result["customer"]["name"]
-    analyzer_id = result["analyzer_id"]
     report_label = result.get("report_label", "분석")
-
-    # 다운로드 버튼 — analyzer_id를 key에 포함해 탭별 충돌 방지
-    st.download_button(
-        "분석 결과 HTML 다운로드",
-        data=html.encode("utf-8"),
-        file_name=f"{customer_name}_{report_label}_분석.html",
-        mime="text/html",
-        key=f"download_{analyzer_id}",
-    )
 
     # 인라인 렌더 — 치료 카드가 없을 때는 안내
     if not result.get("treatment_cards"):
@@ -500,34 +489,88 @@ button, input, textarea, select {
   margin: 0 0 32px 0;
 }
 
-/* ── 파일 업로더 스타일 ──
-   주의: dropzone 내부(Streamlit 기본 문구·버튼)는 건드리지 않음.
-   내부 padding/레이아웃을 override하면 문구가 버튼과 겹침. */
+/* ── 파일 업로더: 커스텀 디자인 오버레이 ──
+   Streamlit 기본 문구/버튼을 모두 숨기고 아이콘+한글 문구를 덮어 그림.
+   dropzone 자체 크기는 유지해서 클릭/드래그 hit area를 살림. */
 [data-testid="stFileUploader"] {
-  background: #FFFFFF;
-  border-radius: 18px;
-  transition: all 0.2s ease;
+  background: transparent;
+  position: relative;
 }
+
+/* 외곽 dashed 박스 + 중앙에 아이콘을 background로 그림 */
 [data-testid="stFileUploaderDropzone"] {
-  border: 1.5px dashed #CCCCCC !important;
-  border-radius: 16px !important;
-  background: #FAFAFA !important;
+  background-color: #FFFFFF !important;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='68' height='68' viewBox='0 0 68 68'><rect width='68' height='68' rx='18' fill='%23FFEAEA'/><g transform='translate(16 16)' fill='none' stroke='%23E53935' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M22 2H6a2 2 0 0 0-2 2v28a2 2 0 0 0 2 2h24a2 2 0 0 0 2-2V12z'/><polyline points='22 2 22 12 32 12'/><line x1='18' y1='28' x2='18' y2='18'/><polyline points='13 23 18 18 23 23'/></g></svg>") !important;
+  background-repeat: no-repeat !important;
+  background-position: center calc(50% - 50px) !important;
+  border: 2px dashed #D5D5D5 !important;
+  border-radius: 20px !important;
+  min-height: 260px !important;
+  padding: 0 !important;
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
 }
 [data-testid="stFileUploaderDropzone"]:hover {
   border-color: #E53935 !important;
-  background: #FFFFFF !important;
+  background-color: #FFFAFA !important;
 }
-/* 버튼 색상만 살짝 프리미엄하게 — 패딩/크기는 기본 유지 */
+
+/* Streamlit 기본 dropzone 내부 요소들 모두 숨김 */
+[data-testid="stFileUploaderDropzone"] > section,
+[data-testid="stFileUploaderDropzone"] > div,
+[data-testid="stFileUploaderDropzoneInstructions"],
+[data-testid="stFileUploaderDropzone"] small,
+[data-testid="stFileUploaderDropzone"] span,
 [data-testid="stFileUploaderDropzone"] button {
-  background: #1F1F1F !important;
-  color: #FFFFFF !important;
-  border: none !important;
-  border-radius: 8px !important;
-  font-weight: 600 !important;
+  visibility: hidden !important;
 }
-[data-testid="stFileUploaderDropzone"] button:hover {
-  background: #E53935 !important;
+
+/* 메인 문구 */
+[data-testid="stFileUploaderDropzone"]::before {
+  content: "제안서 파일을 이곳에 놓아주세요";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(14px);
+  text-align: center;
+  visibility: visible !important;
+  pointer-events: none;
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1F1F1F;
+  letter-spacing: -0.6px;
+}
+
+/* 서브 문구 */
+[data-testid="stFileUploaderDropzone"]::after {
+  content: "PDF 파일을 드래그하거나 클릭하여 시작하세요";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(46px);
+  text-align: center;
+  visibility: visible !important;
+  pointer-events: none;
+  font-family: 'Pretendard Variable', Pretendard, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #9A9A9A;
+  letter-spacing: -0.3px;
+}
+
+/* 업로더 하단 안내 문구 (별도 요소) */
+.uploader-helper {
+  margin-top: 18px;
+  text-align: center;
+  color: #8A8A8A;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.2px;
 }
 
 /* ── 탭 라벨 크게 ── */
@@ -552,13 +595,6 @@ button, input, textarea, select {
   height: 3px !important;
 }
 .stTabs [data-baseweb="tab-panel"] { padding-top: 24px; }
-
-/* 다운로드 버튼도 살짝 고급스럽게 */
-.stDownloadButton button {
-  border-radius: 10px !important;
-  font-weight: 600 !important;
-  padding: 10px 20px !important;
-}
 </style>""", unsafe_allow_html=True)
 
     registry = load_analyzer_registry()
@@ -578,6 +614,14 @@ button, input, textarea, select {
         "가입제안서 PDF를 업로드하세요",
         type="pdf",
         label_visibility="collapsed",
+    )
+
+    # 업로더 하단 안내 문구
+    st.markdown(
+        '<div class="uploader-helper">'
+        '* 가입제안서안에 있는 담보 가입금액을 꼭 계산해보고 참고용으로만 사용하세요'
+        '</div>',
+        unsafe_allow_html=True,
     )
 
     if not uploaded:
