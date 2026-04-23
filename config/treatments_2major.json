@@ -91,14 +91,14 @@
       },
       {
         "id": "brain_thrombolysis",
-        "label": "뇌졸중 혈전용해치료비",
+        "label": "뇌혈관질환 혈전치료비",
         "icon": "pill",
         "color_text": "#3C3489",
         "contributions": [
           {
-            "match_coverage": "혈전용해.*뇌|뇌.*혈전용해",
+            "match_coverage": "뇌혈관.*특정혈전|뇌졸중.*혈전용해|혈전용해.*뇌|뇌.*혈전용해",
             "items": [
-              { "label": "(매회) 뇌졸중 혈전용해치료시", "follow_coverage_amount": true }
+              { "label": "(연1회) 뇌혈관질환 혈전치료시", "follow_coverage_amount": true }
             ]
           }
         ]
@@ -165,14 +165,14 @@
       },
       {
         "id": "heart_thrombolysis",
-        "label": "허혈성심장질환 혈전용해치료비",
+        "label": "허혈성심장질환 혈전치료비",
         "icon": "pill",
         "color_text": "#A32D2D",
         "contributions": [
           {
-            "match_coverage": "혈전용해.*특정심장|특정심장.*혈전용해|혈전용해.*심장|심장.*혈전용해",
+            "match_coverage": "허혈성심장.*특정혈전|특정심장.*혈전|심장.*혈전|혈전.*심장",
             "items": [
-              { "label": "(매회) 특정심장 혈전용해치료시", "follow_coverage_amount": true }
+              { "label": "(연1회) 허혈성심장질환 혈전치료시", "follow_coverage_amount": true }
             ]
           }
         ]
@@ -221,6 +221,28 @@
             "match_coverage": "중증질환자.*심장",
             "items": [
               { "label": "(최초1회) 중증질환자 진단비 (심장)", "follow_coverage_amount": true }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "circulatory_integrated",
+        "label": "특정순환계질환 통합치료비",
+        "icon": "pulse",
+        "color_text": "#A32D2D",
+        "_comment": "심부전·부정맥·대동맥류·문맥혈전 등 순환계 통합 담보. 세부 치료항목 지급액은 담보의 연간 한도(가입금액) 안에서 합산됨. subtotal_mode: coverage_cap으로 담보 가입금액을 상한으로 표시.",
+        "subtotal_mode": "coverage_cap",
+        "contributions": [
+          {
+            "match_coverage": "특정순환계질환.*통합치료비|특정순환계.*통합치료",
+            "items": [
+              { "label": "(연1회) 부분체외순환치료", "amount": 2000, "display": "2,000만원" },
+              { "label": "(수술 1회당) 수술", "amount": 1000, "display": "1,000만원" },
+              { "label": "(연1회) 혈전용해치료", "amount": 1000, "display": "1,000만원" },
+              { "label": "(연1회) 종합병원 중환자실치료", "amount": 1000, "display": "1,000만원" },
+              { "label": "(연1회) 지속적신대체요법(CRRT)", "amount": 500, "display": "500만원" },
+              { "label": "(연1회) 인공호흡기치료(12시간초과)", "amount": 200, "display": "200만원" },
+              { "label": "(연1회) 저체온요법치료", "amount": 100, "display": "100만원" }
             ]
           }
         ]
