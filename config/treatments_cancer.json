@@ -40,6 +40,64 @@
   "cancer_treatment_cards": {
     "cancer_focused_30": [
       {
+        "id": "cancer_diagnosis",
+        "label": "암 진단비",
+        "icon": "ribbon",
+        "color_text": "#993C1D",
+        "recurring": false,
+        "contributions": [
+          {
+            "match_coverage": "암진단및치료비\\[암진단비\\(유사암제외\\)\\]|^(?:갱신형\\s*)?암진단비\\(유사암제외\\)",
+            "section": "일반암 진단 (유사암 제외)",
+            "items": [
+              { "label": "(최초1회) 암 진단시 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(특정소액암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 특정소액암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(특정소화기암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 특정소화기암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(14대특정암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 14대 특정암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(10대특정암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 10대 특정암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(4대고액암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 4대 고액암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?유사암진단비",
+            "section": "유사암 진단 (제자리암·기타피부암·갑상선암·경계성종양)",
+            "items": [
+              { "label": "(최초1회) 유사암 진단시 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          }
+        ]
+      },
+      {
         "id": "targeted",
         "label": "표적항암약물치료비",
         "icon": "target_pill",
@@ -256,6 +314,65 @@
     ],
 
     "the_health_5_10_5": [
+      {
+        "id": "cancer_diagnosis",
+        "label": "암 진단비",
+        "icon": "ribbon",
+        "color_text": "#E53935",
+        "recurring": false,
+        "_comment": "진단 시 최초 1회한 지급. 1년 미경과시 50% 감액.",
+        "contributions": [
+          {
+            "match_coverage": "암진단및치료비\\[암진단비\\(유사암제외\\)\\]",
+            "section": "일반암 진단 (유사암 제외)",
+            "items": [
+              { "label": "(최초1회) 암 진단시 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(특정소액암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 특정소액암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(특정소화기암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 특정소화기암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(14대특정암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 14대 특정암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(10대특정암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 10대 특정암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(4대고액암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 4대 고액암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?유사암진단비",
+            "section": "유사암 진단 (제자리암·기타피부암·갑상선암·경계성종양)",
+            "items": [
+              { "label": "(최초1회) 유사암 진단시 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          }
+        ]
+      },
       {
         "id": "targeted",
         "label": "표적항암약물치료비",
@@ -538,6 +655,65 @@
 
     "integrated_simple": [
       {
+        "id": "cancer_diagnosis",
+        "label": "암 진단비",
+        "icon": "ribbon",
+        "color_text": "#E53935",
+        "recurring": false,
+        "_comment": "진단 시 최초 1회한 지급. 1년 미경과시 50% 감액. 섹션으로 일반암/특정암 가산/유사암 구분.",
+        "contributions": [
+          {
+            "match_coverage": "암진단및치료비\\[암진단비\\(유사암제외\\)\\]",
+            "section": "일반암 진단 (유사암 제외)",
+            "items": [
+              { "label": "(최초1회) 암 진단시 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(특정소액암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 특정소액암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(특정소화기암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 특정소화기암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(14대특정암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 14대 특정암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(10대특정암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 10대 특정암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(4대고액암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 4대 고액암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?유사암진단비",
+            "section": "유사암 진단 (제자리암·기타피부암·갑상선암·경계성종양)",
+            "items": [
+              { "label": "(최초1회) 유사암 진단시 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          }
+        ]
+      },
+      {
         "id": "targeted",
         "label": "표적항암약물치료비",
         "icon": "target_pill",
@@ -773,6 +949,64 @@
     ],
 
     "simple_31": [
+      {
+        "id": "cancer_diagnosis",
+        "label": "암 진단비",
+        "icon": "ribbon",
+        "color_text": "#E53935",
+        "recurring": false,
+        "contributions": [
+          {
+            "match_coverage": "암진단및치료비\\[암진단비\\(유사암제외\\)\\]|^(?:갱신형\\s*)?암진단비\\(유사암제외\\)",
+            "section": "일반암 진단 (유사암 제외)",
+            "items": [
+              { "label": "(최초1회) 암 진단시 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(특정소액암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 특정소액암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(특정소화기암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 특정소화기암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(14대특정암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 14대 특정암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(10대특정암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 10대 특정암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?통합암진단비\\(전이포함\\)\\(유사암제외\\)\\(4대고액암",
+            "section": "특정암 가산 진단",
+            "items": [
+              { "label": "(최초1회) 4대 고액암 진단시 추가 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          },
+          {
+            "match_coverage": "^(?:갱신형\\s*)?유사암진단비",
+            "section": "유사암 진단 (제자리암·기타피부암·갑상선암·경계성종양)",
+            "items": [
+              { "label": "(최초1회) 유사암 진단시 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+            ]
+          }
+        ]
+      },
       {
         "id": "davinci",
         "label": "다빈치로봇수술비",
