@@ -269,6 +269,26 @@ button, input, select, textarea { font-family: var(--font-sans); }
   margin-right: 2px;
 }
 
+/* 섹션 그룹 — 암 진단비 카드 등에서 '일반암 / 특정암 가산 / 유사암' 같은
+   의미론적 구분을 표시할 때 사용. 담보명(┗ 마커)보다 좀 더 뚜렷한 섹션 헤더. */
+.tx-section-group {
+  margin-bottom: 8px;
+  padding-top: 4px;
+}
+.tx-section-group:first-of-type { padding-top: 0; }
+.tx-section-line {
+  font-size: 11px;
+  color: #1A1A2E;
+  font-weight: 700;
+  line-height: 1.3;
+  padding: 3px 8px;
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+  background: #F3EFEA;
+  border-radius: 4px;
+  display: inline-block;
+}
+
 .tx-item {
   display: flex;
   justify-content: space-between;
@@ -433,8 +453,8 @@ button, input, select, textarea { font-family: var(--font-sans); }
       <div class="tx-title">{{ card.label }}</div>
 
       {% for group in card.groups %}
-      <div class="tx-coverage-group">
-        <div class="tx-coverage-line">{{ group.coverage_name_short }}</div>
+      <div class="tx-coverage-group {% if group.is_section %}tx-section-group{% endif %}">
+        <div class="{% if group.is_section %}tx-section-line{% else %}tx-coverage-line{% endif %}">{{ group.coverage_name_short }}</div>
         {% for it in group.item_list %}
         <div class="tx-item">
           <span class="tx-item-label">{{ it.label }}</span>
