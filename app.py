@@ -698,7 +698,7 @@ button, input, textarea, select {
         '<span class="brand">메리츠</span> 보장 분석기'
         '</div>'
         '<div class="hero-sub">'
-        '가입제안서 PDF 하나로 <strong>암 · 2대담보</strong>를 한 번에 분석합니다.'
+        '가입제안서 PDF 하나로 <strong>암 · 2대 보장</strong>을 한 번에 분석합니다.'
         '</div>',
         unsafe_allow_html=True,
     )

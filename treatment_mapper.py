@@ -247,9 +247,19 @@ class TreatmentCard:
 
     @property
     def subtotal_display(self) -> str:
+        """카드 상단 subtotal 표시.
+
+        감액 없는 카드: 단일 값 (예: '5,000만원').
+        감액 있는 카드: 1년 후 값을 크게, 1년 전(감액) 값을 괄호로 작게 표시하는 HTML.
+            예: "9,000만원<span class='deduction-amount'>(5,000만원)</span>"
+        """
         if self.subtotal_min == self.subtotal_max:
             return _format_man(self.subtotal_min)
-        return f"{_format_man(self.subtotal_min)}~\n{_format_man(self.subtotal_max)}"
+        # 1년 후 정상 지급액(max)이 위, 1년 미경과시 감액분(min)이 괄호 안
+        return (
+            f"{_format_man(self.subtotal_max)}"
+            f"<span class='deduction-amount'>({_format_man(self.subtotal_min)})</span>"
+        )
 
 
 def _format_man(man: int) -> str:
