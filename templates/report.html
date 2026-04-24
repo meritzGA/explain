@@ -125,6 +125,14 @@ button, input, select, textarea { font-family: var(--font-sans); }
   margin-left: 6px;
   letter-spacing: -0.02em;
 }
+.mery-amount .mery-deduction {
+  font-size: 20px;
+  font-weight: 700;
+  color: #D32F2F;
+  opacity: 0.7;
+  margin-left: 4px;
+  letter-spacing: -0.02em;
+}
 .mery-disclaimer {
   font-size: 11px;
   color: #9A9A9A;
@@ -173,6 +181,13 @@ button, input, select, textarea { font-family: var(--font-sans); }
   font-weight: 700;
   color: #1A1A2E;
   letter-spacing: -0.02em;
+}
+.total-bar-right .total-bar-deduction {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6A6A6A;
+  margin-left: 3px;
+  letter-spacing: -0.015em;
 }
 
 /* ── 치료 카드 그리드 3×3 ── */
@@ -232,8 +247,17 @@ button, input, select, textarea { font-family: var(--font-sans); }
   display: inline-block;
   line-height: 1.2;
   letter-spacing: -0.02em;
-  white-space: nowrap;
   font-feature-settings: 'tnum' on, 'lnum' on;
+  text-align: center;
+  min-width: 80px;
+}
+/* 감액이 있는 카드의 2줄 subtotal: 괄호 안 금액(1년 전)은 조금 작게 */
+.tx-total-amount .deduction-amount {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.85;
+  display: block;
+  margin-top: 1px;
 }
 
 .tx-divider {
@@ -402,7 +426,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
       </div>
       <div class="mery-amount">
         {% if headline.five_year_is_range %}
-        {{ headline.five_year_min_display }} ~ {{ headline.five_year_max_display }}<span class="suffix">으로 산출됩니다.</span>
+        {{ headline.five_year_max_display }}<span class="mery-deduction">({{ headline.five_year_min_display }})</span><span class="suffix">으로 산출됩니다.</span>
         {% else %}
         {{ headline.five_year_max_display }}<span class="suffix">으로 산출됩니다.</span>
         {% endif %}
@@ -410,7 +434,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
       <div class="mery-disclaimer">
         * 아래 담보별 보장금액을 단순 합산하여 5년을 곱한 참고용 수치입니다. 실제 보장금액과 다를 수 있습니다.
         {% if has_deduction %}<br>
-        * 금액 표기 중 <strong>괄호 안 금액</strong>은 계약일부터 1년 경과 전 감액 적용 시 지급액입니다.
+        * 표기 중 <strong>괄호 안 금액</strong>은 계약일로부터 1년 미경과 시 감액 지급액입니다.
         {% endif %}
       </div>
     </div>
@@ -429,7 +453,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
     </div>
     <div class="total-bar-right">
       {% if headline.annual_is_range %}
-      {{ headline.annual_min_display }} ~{{ headline.annual_max_display }}
+      {{ headline.annual_max_display }}<span class="total-bar-deduction">({{ headline.annual_min_display }})</span>
       {% else %}
       {{ headline.annual_max_display }}
       {% endif %}
@@ -446,7 +470,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
           <div class="tx-total-label">
             {% if card.recurring is sameas false %}평생 1회 지급{% else %}보장 합산{% endif %}
           </div>
-          <div class="tx-total-amount">{{ card.subtotal_display | replace('\n', '') }}</div>
+          <div class="tx-total-amount">{{ card.subtotal_display | safe }}</div>
         </div>
       </div>
       <div class="tx-divider"></div>
@@ -471,7 +495,7 @@ button, input, select, textarea { font-family: var(--font-sans); }
   <!-- ── 하단 disclaimer (캡처에 포함) ── -->
   <div class="disclaimer">
     {% if has_deduction %}
-    * 담보금액이 <strong>3,000만(1,500만)</strong> 형태로 표기된 항목은 계약일부터 1년 경과 전 감액 기간에는 괄호 안 금액이 지급됩니다.<br>
+    * <strong>3,000만원(1,500만원)</strong> 형태로 표기된 금액은 계약일로부터 1년 미경과 시 감액(괄호 안 금액)이 지급되고, 1년 이후부터는 앞의 큰 금액이 전액 지급됩니다.<br>
     {% endif %}
     * 본 분석은 가입제안서의 담보 내역을 단순 계산한 참고자료이며, 실제 보장금액과 다를 수 있습니다. 정확한 내용은 가입제안서를 확인해주세요.
   </div>
