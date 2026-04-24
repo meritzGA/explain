@@ -92,7 +92,7 @@
             "match_coverage": "^(?:갱신형\\s*)?유사암진단비",
             "section": "유사암 진단 (제자리암·기타피부암·갑상선암·경계성종양)",
             "items": [
-              { "label": "(최초1회) 유사암 진단시 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+              { "label": "(최초1회) 유사암 진단시 지급", "follow_coverage_amount": true }
             ]
           }
         ]
@@ -368,7 +368,7 @@
             "match_coverage": "^(?:갱신형\\s*)?유사암진단비",
             "section": "유사암 진단 (제자리암·기타피부암·갑상선암·경계성종양)",
             "items": [
-              { "label": "(최초1회) 유사암 진단시 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+              { "label": "(최초1회) 유사암 진단시 지급", "follow_coverage_amount": true }
             ]
           }
         ]
@@ -708,7 +708,7 @@
             "match_coverage": "^(?:갱신형\\s*)?유사암진단비",
             "section": "유사암 진단 (제자리암·기타피부암·갑상선암·경계성종양)",
             "items": [
-              { "label": "(최초1회) 유사암 진단시 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+              { "label": "(최초1회) 유사암 진단시 지급", "follow_coverage_amount": true }
             ]
           }
         ]
@@ -1002,7 +1002,7 @@
             "match_coverage": "^(?:갱신형\\s*)?유사암진단비",
             "section": "유사암 진단 (제자리암·기타피부암·갑상선암·경계성종양)",
             "items": [
-              { "label": "(최초1회) 유사암 진단시 지급", "follow_coverage_amount": true, "deduction_pct": 50 }
+              { "label": "(최초1회) 유사암 진단시 지급", "follow_coverage_amount": true }
             ]
           }
         ]
