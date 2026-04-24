@@ -167,7 +167,7 @@ def _build_guide_items_for_card(
                 label=label,
                 min_amount=min_amt,
                 max_amount=max_amt,
-                display=f"{min_amt:,}만({max_amt:,}만)",
+                display=f"{max_amt:,}만({min_amt:,}만)",
             )
         return TreatmentItem(
             coverage_name=coverage_name,
@@ -192,7 +192,7 @@ def _build_guide_items_for_card(
                 label="(연간 치료횟수 2회시) 표적항암약물 치료 전액 추가",
                 min_amount=min_amt,
                 max_amount=cap_man,
-                display=f"{min_amt:,}만({cap_man:,}만)",
+                display=f"{cap_man:,}만({min_amt:,}만)",
             )]
         if card_id == "proton":
             return [TreatmentItem(
@@ -200,7 +200,7 @@ def _build_guide_items_for_card(
                 label="(연간 치료횟수 2회시) 항암양성자방사선 치료 전액 추가",
                 min_amount=min_amt,
                 max_amount=cap_man,
-                display=f"{min_amt:,}만({cap_man:,}만)",
+                display=f"{cap_man:,}만({min_amt:,}만)",
             )]
         return []  # 다른 카드엔 기여 없음
 
@@ -366,7 +366,7 @@ def build_treatment_cards(
                             label=item_def["label"],
                             min_amount=min_amt,
                             max_amount=amt_man,
-                            display=f"{min_amt:,}만({amt_man:,}만)",
+                            display=f"{amt_man:,}만({min_amt:,}만)",
                             section=section,
                         )
                     else:
@@ -384,7 +384,7 @@ def build_treatment_cards(
                         label=item_def["label"],
                         min_amount=item_def["min"],
                         max_amount=item_def["max"],
-                        display=item_def.get("display", f"{item_def['min']:,}만({item_def['max']:,}만)"),
+                        display=item_def.get("display", f"{item_def['max']:,}만({item_def['min']:,}만)"),
                         section=section,
                     )
                 else:
