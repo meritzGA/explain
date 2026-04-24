@@ -359,6 +359,15 @@ def build_analyzer_result(pdf_bytes: bytes, analyzer_id: str) -> dict:
             "groups": groups,
         })
 
+    # 감액 구조 자동 감지 — treatment_cards 중 min_amount ≠ max_amount인 item이 있으면
+    # "1년 미경과시 감액" 안내 disclaimer를 표시.
+    has_deduction_actual = any(
+        it["min_amount"] != it["max_amount"]
+        for card in treatment_cards
+        for g in card["groups"]
+        for it in g["item_list"]
+    )
+
     return {
         "customer": parsed["customer"],
         "policy": parsed["policy"],
@@ -372,8 +381,9 @@ def build_analyzer_result(pdf_bytes: bytes, analyzer_id: str) -> dict:
         "report_label": analyzer.get("report_label")
                         or treatments_config.get("report_title_prefix")
                         or "치료비",
-        # 감액 구조(1년 미경과시 50%)가 있는지. 2대담보는 false → min/max 단일 표기 + 안내문구 숨김
-        "has_deduction": treatments_config.get("has_deduction", True),
+        # 감액 구조(1년 미경과시 50%): 실제 카드 내용에 감액이 있는지 기준으로 런타임 결정.
+        # treatments_config의 has_deduction은 이제 참고용으로만 쓰이고, 실제 표시는 카드 내용 기반.
+        "has_deduction": has_deduction_actual,
         "analyzer_id": analyzer_id,
         "tab_label": analyzer["tab_label"],
     }

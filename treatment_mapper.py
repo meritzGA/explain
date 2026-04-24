@@ -154,27 +154,53 @@ def _build_guide_items_for_card(
         return None
     group_key, tier_key, items_dict = resolved
 
+    # 감액 비율 조회 (해당 그룹에 deduction_pct가 있으면 min = max * pct / 100)
+    guide = _load_guide_amounts()
+    deduction_pct = guide.get(group_key, {}).get("deduction_pct")
+
+    def _mk_item(label: str, max_amt: int, coverage_name: str) -> "TreatmentItem":
+        """감액 구조 반영한 TreatmentItem 생성."""
+        if deduction_pct and 0 < deduction_pct < 100:
+            min_amt = int(max_amt * deduction_pct / 100)
+            return TreatmentItem(
+                coverage_name=coverage_name,
+                label=label,
+                min_amount=min_amt,
+                max_amount=max_amt,
+                display=f"{min_amt:,}만({max_amt:,}만)",
+            )
+        return TreatmentItem(
+            coverage_name=coverage_name,
+            label=label,
+            min_amount=max_amt,
+            max_amount=max_amt,
+            display=_format_man(max_amt),
+        )
+
     # 특수 케이스: cancer_integrated_III (116번)
-    # → 표적항암 or 양성자방사선 카드에만 cap 추가
+    # → 표적항암 or 양성자방사선 카드에만 cap 추가. 감액 구조 적용 (약관 기준 1년 전 50% / 1년 후 100%).
     if group_key == "cancer_integrated_III":
         cap_man = items_dict.get("cap_man", 0)
         if cap_man == 0:
             return []
+        # cancer_integrated_III는 JSON에 deduction_pct가 없지만, 약관상 감액 있음
+        # → 여기서만 특수 처리 (다른 특수 규칙은 "연간 치료횟수 2회시" 조건부 지급)
+        min_amt = cap_man // 2
         if card_id == "targeted":
             return [TreatmentItem(
                 coverage_name=cov.name,
-                label=f"(연간 치료횟수 2회시) 표적항암약물 치료 전액 추가",
-                min_amount=cap_man,
+                label="(연간 치료횟수 2회시) 표적항암약물 치료 전액 추가",
+                min_amount=min_amt,
                 max_amount=cap_man,
-                display=_format_man(cap_man),
+                display=f"{min_amt:,}만({cap_man:,}만)",
             )]
         if card_id == "proton":
             return [TreatmentItem(
                 coverage_name=cov.name,
-                label=f"(연간 치료횟수 2회시) 항암양성자방사선 치료 전액 추가",
-                min_amount=cap_man,
+                label="(연간 치료횟수 2회시) 항암양성자방사선 치료 전액 추가",
+                min_amount=min_amt,
                 max_amount=cap_man,
-                display=_format_man(cap_man),
+                display=f"{min_amt:,}만({cap_man:,}만)",
             )]
         return []  # 다른 카드엔 기여 없음
 
@@ -189,13 +215,7 @@ def _build_guide_items_for_card(
             amt = items_dict.get(gkey)
             if amt is None or amt == 0:
                 continue
-            result.append(TreatmentItem(
-                coverage_name=cov.name,
-                label=map_entry["label_tpl"],
-                min_amount=amt,
-                max_amount=amt,
-                display=f"{amt:,}만",
-            ))
+            result.append(_mk_item(map_entry["label_tpl"], amt, cov.name))
     return result
 
 
@@ -207,6 +227,9 @@ class TreatmentItem:
     min_amount: int  # 만원 단위
     max_amount: int  # 만원 단위
     display: str  # '1,000만', '1,000만(3,000만)' 등
+    # 카드 내 섹션 그룹 (예: '일반암 진단', '특정암 가산', '유사암 진단').
+    # 비어있으면 coverage_name 기준으로 그룹핑됨.
+    section: str = ""
 
 
 @dataclass
@@ -319,16 +342,32 @@ def build_treatment_cards(
                 continue  # 기존 items 루프 건너뛰기
 
             for item_def in contrib.get("items", []):
+                # contribution 또는 item_def에서 section 라벨 가져오기 (item_def가 우선)
+                section = item_def.get("section") or contrib.get("section") or ""
                 # follow_coverage_amount=True면 담보의 실제 가입금액을 사용
                 if item_def.get("follow_coverage_amount") and matching_cov.amount:
                     amt_man = matching_cov.amount // 10000
-                    item = TreatmentItem(
-                        coverage_name=matching_cov.name,
-                        label=item_def["label"],
-                        min_amount=amt_man,
-                        max_amount=amt_man,
-                        display=_format_man(amt_man),
-                    )
+                    # deduction_pct: 1년 미경과시 감액 비율 (예: 50 → 1년 전 50%, 1년 후 100%)
+                    ded = item_def.get("deduction_pct")
+                    if ded and 0 < ded < 100:
+                        min_amt = int(amt_man * ded / 100)
+                        item = TreatmentItem(
+                            coverage_name=matching_cov.name,
+                            label=item_def["label"],
+                            min_amount=min_amt,
+                            max_amount=amt_man,
+                            display=f"{min_amt:,}만({amt_man:,}만)",
+                            section=section,
+                        )
+                    else:
+                        item = TreatmentItem(
+                            coverage_name=matching_cov.name,
+                            label=item_def["label"],
+                            min_amount=amt_man,
+                            max_amount=amt_man,
+                            display=_format_man(amt_man),
+                            section=section,
+                        )
                 elif "min" in item_def and "max" in item_def:
                     item = TreatmentItem(
                         coverage_name=matching_cov.name,
@@ -336,6 +375,7 @@ def build_treatment_cards(
                         min_amount=item_def["min"],
                         max_amount=item_def["max"],
                         display=item_def.get("display", f"{item_def['min']:,}만({item_def['max']:,}만)"),
+                        section=section,
                     )
                 else:
                     amt = item_def.get("amount", 0)
@@ -345,6 +385,7 @@ def build_treatment_cards(
                         min_amount=amt,
                         max_amount=amt,
                         display=item_def.get("display", f"{amt:,}만"),
+                        section=section,
                     )
 
                 if exclusive_group:
@@ -375,6 +416,7 @@ def build_treatment_cards(
         # subtotal_mode: "coverage_cap"이면 담보 가입금액을 상한(cap)으로 사용.
         # 예: 특정순환계질환 통합치료비 — 세부 치료 항목을 나열하지만
         # 연간 총 지급액은 담보 가입금액을 넘지 않음(예: 5,000만원 한도).
+        # 감액 구조가 있으면(items 중 min != max) cap에도 같은 비율을 적용.
         subtotal_mode = card_def.get("subtotal_mode", "sum")
         if subtotal_mode == "coverage_cap":
             # 이 카드에 매칭된 담보 중 가장 큰 가입금액을 cap으로 사용
@@ -386,8 +428,17 @@ def build_treatment_cards(
             ]
             if caps:
                 cap_man = max(caps)
-                card.subtotal_min = cap_man
-                card.subtotal_max = cap_man
+                # items에 감액이 있으면(min_sum < max_sum) 같은 비율을 cap_min에 적용
+                items_max_sum = sum(i.max_amount for i in card.items)
+                items_min_sum = sum(i.min_amount for i in card.items)
+                if items_max_sum > 0 and items_min_sum < items_max_sum:
+                    # items의 비율대로 cap_min 계산
+                    ratio = items_min_sum / items_max_sum
+                    card.subtotal_min = int(cap_man * ratio)
+                    card.subtotal_max = cap_man
+                else:
+                    card.subtotal_min = cap_man
+                    card.subtotal_max = cap_man
             else:
                 card.subtotal_min = sum(i.min_amount for i in card.items)
                 card.subtotal_max = sum(i.max_amount for i in card.items)
@@ -467,7 +518,42 @@ def build_headline(
 # 치료 카드 내에서 같은 담보에서 나온 items를 하나의 계층으로 묶어서 보여주기 위한 유틸
 
 def group_items_by_coverage(card: TreatmentCard) -> list[dict]:
-    """같은 담보에서 나온 items를 묶어서 ┗ 계층 표기용 구조로 변환"""
+    """같은 담보(또는 section)에서 나온 items를 묶어서 ┗ 계층 표기용 구조로 변환.
+
+    동작:
+      - 카드에 `section`이 지정된 items가 하나라도 있으면 **section 우선 그룹핑**.
+        section이 동일한 items는 하나의 그룹으로 묶고, 그룹 이름은 section 라벨로.
+      - section 미지정 items만 있으면 기존처럼 coverage_name으로 그룹핑.
+    """
+    has_section = any(getattr(it, "section", "") for it in card.items)
+
+    if has_section:
+        # section 기반 그룹핑 — section이 빈 items는 coverage_name을 키로 사용
+        groups: dict[str, list[TreatmentItem]] = {}
+        order: list[str] = []
+        key_is_section: dict[str, bool] = {}
+        for item in card.items:
+            sec = getattr(item, "section", "") or item.coverage_name
+            if sec not in groups:
+                groups[sec] = []
+                order.append(sec)
+                key_is_section[sec] = bool(getattr(item, "section", ""))
+            groups[sec].append(item)
+
+        result = []
+        for key in order:
+            # section 그룹명은 그대로 표시, coverage_name 그룹명은 기존처럼 축약
+            is_section = key_is_section[key]
+            display_name = key if is_section else _shorten_coverage_name(key)
+            result.append({
+                "coverage_name": key,
+                "coverage_name_short": display_name,
+                "is_section": is_section,
+                "item_list": [asdict(i) for i in groups[key]],
+            })
+        return result
+
+    # 기존 로직: coverage_name 기반 그룹핑
     groups: dict[str, list[TreatmentItem]] = {}
     order: list[str] = []
     for item in card.items:
@@ -481,6 +567,7 @@ def group_items_by_coverage(card: TreatmentCard) -> list[dict]:
         result.append({
             "coverage_name": cov_name,
             "coverage_name_short": _shorten_coverage_name(cov_name),
+            "is_section": False,
             "item_list": [asdict(i) for i in groups[cov_name]],
         })
     return result
