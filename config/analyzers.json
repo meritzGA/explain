@@ -12,7 +12,7 @@
     },
     {
       "id": "two_major",
-      "tab_label": "2대담보 분석",
+      "tab_label": "2대 보장 분석",
       "report_label": "2대담보 치료비",
       "events_config": "events_2major.json",
       "treatments_config": "treatments_2major.json",
